@@ -1,0 +1,23 @@
+{
+    "name": "laravellegends/eloquent-filter",
+    "description": "A simple Eloquent filter to make easy API filtering",
+    "type": "library",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Wallace Maxters",
+            "email": "wallacemaxters@gmail.com"
+        }
+    ],
+    "minimum-stability": "dev",
+    "require": {},
+    "autoload": {
+        "psr-4": {
+            "LaravelLegends\\EloquentFilter" : "src/"
+        }
+    },
+    "require-dev": {
+        "orchestra/testbench": "3.1.* || 4.0.*",
+        "phpunit/phpunit": "4.8.* || ^8.0"
+    }
+}
