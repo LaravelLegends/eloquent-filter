@@ -1,6 +1,6 @@
 # Eloquent Filter
 
-Uma simples para facilitar a utilização de filtros no Eloquent. É muito útil para padronizar consultas em chamadas de API.
+Uma simples biblioteca para facilitar a utilização de filtros no Eloquent. É muito útil para padronizar consultas em chamadas de API.
 
 Exemplo de uso:
 
