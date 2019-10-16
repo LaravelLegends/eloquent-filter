@@ -14,8 +14,7 @@ class Filter
         'ends_with',
         'starts_with',
         'exact',
-        'has',
-        'doesnt_have',
+        'has'
     ];
 
     protected $prefix = null;
@@ -56,15 +55,17 @@ class Filter
     public function getCallback(Request $request)
     {
         $filters = $this->getFiltersByParams($request);
-
+        
         return function ($query) use($filters) {
             
             foreach ($filters as $name => $fields) {
 
                 $method = $this->getMethodFromFilterName($name);
                 
-                $this->$method($fields, $query);
+                $this->$method((array) $fields, $query);
             }
+
+            return $query;
         };
     }
 
@@ -130,6 +131,19 @@ class Filter
     {
         $this->applyByLikeOperator($fields, $query, '%%%s%%');
     }
+
+    protected function applyHas(array $fields, $query)
+    {
+        foreach ($fields as $name => $field) {
+
+            if ($this->isEmpty($field)) continue;
+
+            $boolean = filter_var($field, FILTER_VALIDATE_BOOLEAN);
+
+            $boolean ? $query->has($name) : $query->doesntHave($name);
+        }
+    }
+
 
     protected function getMethodFromFilterName($name)
     {
