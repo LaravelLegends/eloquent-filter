@@ -9,15 +9,15 @@
             "email": "wallacemaxters@gmail.com"
         }
     ],
-    "minimum-stability": "dev",
+    "minimum-stability": "stable",
     "require": {},
     "autoload": {
         "psr-4": {
-            "LaravelLegends\\EloquentFilter" : "src/"
+            "LaravelLegends\\EloquentFilter\\" : "src/eloquent-filter/"
         }
     },
     "require-dev": {
-        "orchestra/testbench": "3.1.* || 4.0.*",
-        "phpunit/phpunit": "4.8.* || ^8.0"
+        "orchestra/testbench": "^3.4",
+        "phpunit/phpunit": "4.8.*"
     }
 }
