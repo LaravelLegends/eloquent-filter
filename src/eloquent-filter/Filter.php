@@ -14,7 +14,8 @@ class Filter
         'ends_with',
         'starts_with',
         'exact',
-        'has'
+        'has',
+        'is_null'
     ];
 
     protected $prefix = null;
@@ -142,6 +143,20 @@ class Filter
 
             $boolean ? $query->has($name) : $query->doesntHave($name);
         }
+    }
+
+    protected function applyIsNull(array $fields, $query)
+    {
+        foreach ($fields as $name => $field) {            
+
+            if ($this->isEmpty($field)) continue;
+
+            $boolean = filter_var($field, FILTER_VALIDATE_BOOLEAN);
+
+            $boolean ? $query->whereNull($name) : $query->whereNotNull($name);
+        }
+
+        return $this;
     }
 
 

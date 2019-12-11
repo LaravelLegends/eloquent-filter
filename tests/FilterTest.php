@@ -151,6 +151,24 @@ class FilterTest extends Orchestra\Testbench\TestCase
 	}
 
 
+	public function testApplyIsNull()
+	{
+		request()->replace([
+			'is_null' => ['deleted_at' => '1', 'cpf' => '0']
+		]);
+
+		$query = User::query();
+
+		(new Filter())->apply($query, request());
+
+		$expected_sql = 'select * from "users" where ("deleted_at" is null and "cpf" is not null)';
+
+		$this->assertTrue($query->toSql() === $expected_sql);
+
+		$this->assertTrue(count($query->getBindings()) === 0);
+	}
+
+
 	public function testFromModel()
 	{
 		request()->replace([
