@@ -67,7 +67,12 @@ A url `api/users?has[posts]=0` é equivalente à `User::doesntHave('posts')`
 
 
 
+## `is_null`
 
+Filtra se o valor for `null` ou não. Use `1` para quando for `null`, e `0` para quando não for.
 
+Exemplo:
 
+A url `api/users?is_null[cpf]=1` é equivalente à `User::whereNotNull('cpf')`
 
+A url `api/users?is_null[age]=0` é equivalente à `User::whereNull('age')`
