@@ -2,7 +2,13 @@
 
 Uma simples biblioteca para facilitar a utilização de filtros no Eloquent. É muito útil para padronizar consultas em chamadas de API.
 
-Exemplo de uso:
+## Instalação
+
+Rode o comando 
+
+```composer require laravellegends/eloquent-filter```
+
+## Exemplos:
 
 ```php
 
