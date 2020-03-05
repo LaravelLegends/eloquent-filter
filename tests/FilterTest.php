@@ -222,5 +222,64 @@ class FilterTest extends Orchestra\Testbench\TestCase
 
 		$this->assertContains('%wallace%', $bindings);
 		$this->assertContains('18', $bindings);
-	}
+    }
+    
+
+    public function testApplyIn()
+    {
+        request()->replace([
+			'in' => ['role_id' => ['1', '2']]
+		]);
+
+		$query = User::query();
+
+		(new Filter())->apply($query, request());
+
+        $expected_sql = 'select * from "users" where ("role_id" in (?, ?))';
+
+        $this->assertTrue($query->toSql() === $expected_sql);
+        
+        $bindings = $query->getBindings();
+
+		$this->assertContains('2', $bindings);
+		$this->assertContains('1', $bindings);
+    }
+
+
+    public function testApplyNotIn()
+    {
+        request()->replace([
+            'not_in' => ['name' => ['wallacemaxters', 'brcontainer']],
+		]);
+
+		$query = User::query();
+
+		(new Filter())->apply($query, request());
+
+        $expected_sql = 'select * from "users" where ("name" not in (?, ?))';
+
+        $this->assertTrue($query->toSql() === $expected_sql);
+        
+        $bindings = $query->getBindings();
+
+		$this->assertContains('wallacemaxters', $bindings);
+		$this->assertContains('brcontainer', $bindings);
+    }
+
+
+    public function testApplyNotInAndIn()
+    {
+        request()->replace([
+            'in'     => ['role' => ['1', '2']],
+            'not_in' => ['name' => ['wallacemaxters', 'brcontainer']],
+		]);
+
+		$query = User::query();
+
+		(new Filter())->apply($query, request());
+
+        $expected_sql = 'select * from "users" where ("role" in (?, ?) and "name" not in (?, ?))';
+
+        $this->assertTrue($query->toSql() === $expected_sql);
+    }
 }

@@ -82,3 +82,26 @@ Exemplo:
 A url `api/users?is_null[cpf]=1` é equivalente à `User::whereNotNull('cpf')`
 
 A url `api/users?is_null[age]=0` é equivalente à `User::whereNull('age')`
+
+
+
+## `not_in`
+
+Filtra quando multiplos valores não estão presente numa coluna. 
+
+Exemplo:
+
+A url `api/users?not_in[role][]=1&not_in[role][]=2` é equivalente à `User::whereNotIn('role', [1, 2])`
+
+**Observação**: Quando o `not_in[my_field]` for equivalente a um array vazio, nada será executado.
+
+
+## `in`
+
+Filtra quando multiplos valores estão presentes numa coluna. 
+
+Exemplo:
+
+A url `api/users?in[role][]=10&in[role][]=20` é equivalente à `User::whereIn('role', [10, 20])`
+
+**Observação**: Quando o `in[my_field]` for equivalente a um array vazio, nada será executado.

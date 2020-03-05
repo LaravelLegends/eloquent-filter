@@ -15,7 +15,9 @@ class Filter
         'starts_with',
         'exact',
         'has',
-        'is_null'
+        'is_null',
+        'in',
+        'not_in'
     ];
 
     protected $prefix = null;
@@ -157,6 +159,21 @@ class Filter
         }
 
         return $this;
+    }
+
+
+    protected function applyIn(array $fields, $query)
+    {
+        foreach ($fields as $name => $value) {
+            $this->isEmpty($value) || $query->whereIn($name, $value);
+        }
+    }
+
+    protected function applyNotIn(array $fields, $query)
+    {
+        foreach ($fields as $name => $value) {
+            $this->isEmpty($value) || $query->whereNotIn($name, $value);
+        }
     }
 
 
