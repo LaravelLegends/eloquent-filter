@@ -96,7 +96,7 @@ class Filter
         return $this;
     }
 
-    protected function applyByLikeOperator(array $fields, Builder $query, string $str_template) 
+    protected function applyByLikeOperator(array $fields, Builder $query, $str_template) 
     {
         foreach ($fields as $name => $value) {
             $this->isEmpty($value) || $query->where($name, 'LIKE', sprintf($str_template, $value));
