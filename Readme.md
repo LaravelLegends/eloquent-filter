@@ -79,9 +79,9 @@ Filtra se o valor for `null` ou não. Use `1` para quando for `null`, e `0` para
 
 Exemplo:
 
-A url `api/users?is_null[cpf]=1` é equivalente à `User::whereNotNull('cpf')`
+A url `api/users?is_null[cpf]=1` é equivalente à `User::whereNull('cpf')`
 
-A url `api/users?is_null[age]=0` é equivalente à `User::whereNull('age')`
+A url `api/users?is_null[age]=0` é equivalente à `User::whereNotNull('age')`
 
 
 
