@@ -4,44 +4,24 @@ namespace LaravelLegends\EloquentFilter;
 
 use Illuminate\Http\Request;
 use Illuminate\Database\Eloquent\Builder;
+use LaravelLegends\EloquentFilter\Rules;
+use LaravelLegends\EloquentFilter\Rules\Searchable;
 
 class Filter
 {
-    protected $params = [
-        'max',
-        'min',
-        'contains',
-        'ends_with',
-        'starts_with',
-        'exact',
-        'has',
-        'is_null',
-        'in',
-        'not_in'
+
+    protected $rules = [
+        'max'         => Rules\Max::class,
+        'min'         => Rules\Min::class,
+        'contains'    => Rules\Contains::class,
+        'ends_with'   => Rules\EndsWith::class,
+        'starts_with' => Rules\StartsWith::class,
+        'exact'       => Rules\Exact::class,
+        'has'         => Rules\Has::class,
+        'is_null'     => Rules\IsNull::class,
+        'in'          => Rules\In::class,
+        'not_in'      => Rules\NotIn::class,
     ];
-
-    protected $prefix = null;
-
-    /**
-     * @param string $prefix
-     * 
-     * 
-     */
-    public function setPrefix($prefix)
-    {
-        $this->prefix = $prefix;
-
-        return $this;
-    }
-
-    /**
-     * 
-     * @return string|null
-     */
-    public function getPrefix()
-    {
-        return $this->prefix;
-    }
 
     /**
      * 
@@ -55,131 +35,82 @@ class Filter
         return $this;
     }
 
+    /**
+     * Get the callback with queries created from request to filter the models
+     * 
+     * @param Request $request
+     * @return \Closure
+     */
     public function getCallback(Request $request)
     {
-        $filters = $this->getFiltersByParams($request);
+        $rules = $this->getRulesFromRequest($request);
         
-        return function ($query) use($filters) {
+        return function ($query) use($rules) {
             
-            foreach ($filters as $name => $fields) {
-
-                $method = $this->getMethodFromFilterName($name);
-                
-                $this->$method((array) $fields, $query);
+            foreach ($rules as $rule_name => $fields) {
+                $fields && $this->applyRule($query, $rule_name, $fields);
             }
-
+            
             return $query;
         };
     }
 
-    protected function getFiltersByParams(Request $request)
+    /**
+     * Extracts the parameters used in model filters from request
+     * 
+     * @return array
+     */
+    protected function getRulesFromRequest(Request $request)
     {
-        $params = $this->params;
-
-        if ($this->prefix !== null) {
-
-            $params = array_map(function ($param) {
-                return $this->prefix . $param;
-            }, $this->params);
-        }
+        $params = array_keys($this->rules);
 
         return $request->only($params);
     }
 
-
-    protected function applyByOperator(array $fields, $query, $operator) 
+    /**
+     * Apply filter rule in query
+     * 
+     * @param $query
+     * @param string $name
+     * @param array $fields
+     * 
+     * @return static
+     */
+    public function applyRule($query, $name, array $fields)
     {
-        foreach ($fields as $name => $value) {            
-            $this->isEmpty($value) || $query->where($name, $operator, $value);
+        $rule = $this->getRuleAsCallable($name);
+
+        foreach ($fields as $field => $value) {
+            $this->isEmpty($value) || $rule($query, $field, $value);
         }
 
         return $this;
     }
 
-    protected function applyByLikeOperator(array $fields, Builder $query, $str_template) 
+    public function getRule($name)
     {
-        foreach ($fields as $name => $value) {
-            $this->isEmpty($value) || $query->where($name, 'LIKE', sprintf($str_template, $value));
+        return $this->rules[$name];
+    }
+
+    public function setRule($name, $rule) 
+    {
+        if ($rule instanceof Searchable || is_callable($rule)) {
+            $this->rules[$name] = $rule;
         }
 
-        return $this;
+        throw new \UnexpectedValueException('The rule should be callable or instance of ' . Searchable::class);
     }
 
-    protected function applyMin(array $fields, $query)
+    /**
+     * Get the rule as callable
+     * 
+     * @param string $name
+     */
+    public function getRuleAsCallable($name)
     {
-        $this->applyByOperator($fields, $query, '>=');
-    }
+        $rule = $this->getRule($name);
 
-    protected function applyMax(array $fields, $query)
-    {
-        $this->applyByOperator($fields, $query, '<=');
-    }
-
-    protected function applyExact(array $fields, $query)
-    {
-        $this->applyByOperator($fields, $query, '=');
-    }
-
-    protected function applyEndsWith(array $fields, $query)
-    {
-        $this->applyByLikeOperator($fields, $query, '%%%s');
-    }
-
-    protected function applyStartsWith(array $fields, $query)
-    {
-        $this->applyByLikeOperator($fields, $query, '%s%%');
-    }
-
-    protected function applyContains(array $fields, $query)
-    {
-        $this->applyByLikeOperator($fields, $query, '%%%s%%');
-    }
-
-    protected function applyHas(array $fields, $query)
-    {
-        foreach ($fields as $name => $field) {
-
-            if ($this->isEmpty($field)) continue;
-
-            $boolean = filter_var($field, FILTER_VALIDATE_BOOLEAN);
-
-            $boolean ? $query->has($name) : $query->doesntHave($name);
-        }
-    }
-
-    protected function applyIsNull(array $fields, $query)
-    {
-        foreach ($fields as $name => $field) {            
-
-            if ($this->isEmpty($field)) continue;
-
-            $boolean = filter_var($field, FILTER_VALIDATE_BOOLEAN);
-
-            $boolean ? $query->whereNull($name) : $query->whereNotNull($name);
-        }
-
-        return $this;
-    }
-
-
-    protected function applyIn(array $fields, $query)
-    {
-        foreach ($fields as $name => $value) {
-            $this->isEmpty($value) || $query->whereIn($name, $value);
-        }
-    }
-
-    protected function applyNotIn(array $fields, $query)
-    {
-        foreach ($fields as $name => $value) {
-            $this->isEmpty($value) || $query->whereNotIn($name, $value);
-        }
-    }
-
-
-    protected function getMethodFromFilterName($name)
-    {
-        return 'apply' . implode('', array_map('ucfirst', explode('_', $name)));
+        return is_callable($rule) ? $rule : new $rule;
     }
 
     protected function isEmpty($value)
@@ -187,6 +118,7 @@ class Filter
         return $value === '' || $value === [];
     }
 
+    
     public static function fromModel($model, Request $request)
     {
         if (! is_subclass_of($model, \Illuminate\Database\Eloquent\Model::class)) {
@@ -198,5 +130,11 @@ class Filter
         (new static())->apply($query, $request);
 
         return $query;
+    }
+
+
+    public static function make()
+    {
+        return new static;
     }
 }

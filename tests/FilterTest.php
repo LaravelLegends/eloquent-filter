@@ -2,6 +2,8 @@
 
 use LaravelLegends\EloquentFilter\Filter;
 
+use function Ramsey\Uuid\v1;
+
 class FilterTest extends Orchestra\Testbench\TestCase
 {
 	protected function getEnvironmentSetUp($app)
@@ -89,6 +91,7 @@ class FilterTest extends Orchestra\Testbench\TestCase
 		$query = User::query();
 
 		(new Filter())->apply($query, request());
+
 
 		$this->assertTrue($query->toSql() === 'select * from "users" where ("name" LIKE ?)');
 
@@ -178,6 +181,8 @@ class FilterTest extends Orchestra\Testbench\TestCase
 
 		$query = Filter::fromModel(User::class, request());
 
+		var_dump('select * from "users" where ("age" <= ? and "name" LIKE ?)', $query->toSql());
+
 		$this->assertTrue(
 			$query->toSql() == 'select * from "users" where ("age" <= ? and "name" LIKE ?)'
 		);
@@ -188,42 +193,6 @@ class FilterTest extends Orchestra\Testbench\TestCase
 		$this->assertContains('18', $bindings);
 	}
 
-
-	public function testGetPrefix()
-	{
-		$filter = new Filter();
-
-		$this->assertTrue($filter->getPrefix() === null);
-
-		$filter->setPrefix('_');
-
-		$this->assertTrue($filter->getPrefix() === '_');
-	}
-
-	public function testApplyWithSetPrefix()
-	{
-		$request = request();
-		
-		$request->replace([
-			'_max'      => ['age' => '18'],
-			'_contains' => ['name' => 'wallace'],
-		]);
-
-		$query = User::query();
-
-		(new Filter())->setPrefix('_')->apply($query, $request);
-
-		$this->assertTrue(
-			$query->toSql() == 'select * from "users" where ("age" <= ? and "name" LIKE ?)'
-		);
-
-
-		$bindings = $query->getBindings();
-
-		$this->assertContains('%wallace%', $bindings);
-		$this->assertContains('18', $bindings);
-    }
-    
 
     public function testApplyIn()
     {
