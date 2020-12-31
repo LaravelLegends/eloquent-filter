@@ -6,10 +6,10 @@ use Illuminate\Http\Request;
 
 trait HasFilter
 {
-    public function filter(Request $request = null)
+    public function scopeFilter($query, Request $request = null)
     {
-        $request ?: $request = request();
+        Filter::make()->apply($query, $request ?: request());
         
-        return Filter::make()->apply($this->query(), $request);
+        return $query;
     }
 }
