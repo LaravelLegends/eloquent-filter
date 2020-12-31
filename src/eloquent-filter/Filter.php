@@ -7,6 +7,11 @@ use Illuminate\Database\Eloquent\Builder;
 use LaravelLegends\EloquentFilter\Rules;
 use LaravelLegends\EloquentFilter\Rules\Searchable;
 
+/**
+ * This class creates query filters based on request
+ * 
+ * @author Wallace Maxters <wallacemaxters@gmail.com>
+ */
 class Filter
 {
 
@@ -96,11 +101,25 @@ class Filter
         return $this;
     }
 
+    /**
+     * Gets the rule by name
+     * 
+     * @param string $name
+     * 
+     * @return string|Closure
+     */
     public function getRule($name)
     {
         return $this->rules[$name];
     }
 
+    /**
+     * Sets the rule
+     * 
+     * @param string $name
+     * @param callable|\LaravelLegends\EloquentFilter\Rules\Searchable $rule
+     * @throws \UnexpectedValueException on value is not callable or not implements Searchable interface
+     */
     public function setRule($name, $rule) 
     {
         if ($rule instanceof Searchable || is_callable($rule)) {
@@ -125,21 +144,30 @@ class Filter
         return is_callable($rule) ? $rule : new $rule;
     }
 
+    /**
+     * Detect if value of request is "empty"
+     * 
+     * @return boolean
+     */
     protected function isEmpty($value)
     {
         return $value === '' || $value === [];
     }
 
-    
+    /**
+     * Apply filter directly in model
+     * 
+     * @param string Model class
+     * @param \Illuminate\Http\Request $request
+     * @return \Illuminate\Database\Eloquent\Builder
+     */
     public static function fromModel($model, Request $request)
     {
         if (! is_subclass_of($model, \Illuminate\Database\Eloquent\Model::class)) {
-            throw new \InvalidArgumentException('Only models can be passed by parameters');
+            throw new \InvalidArgumentException('Only models can be passed by parameter');
         }
 
-        $query = $model::query();
-
-        (new static())->apply($query, $request);
+        static::make()->apply($query = $model::query(), $request);
 
         return $query;
     }
