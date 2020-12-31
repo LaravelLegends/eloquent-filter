@@ -2,19 +2,75 @@
 
 Uma simples biblioteca para facilitar a utilização de filtros no Eloquent. É muito útil para padronizar consultas em chamadas de API.
 
+
+## Descrição
+
+Essa biblioteca tem como finalidade facilitar e padronizar a utilização de filtros de pesquisa para o Laravel. A ideia é agregar vários filtros simplesmente passando os valores na sua requisição. Além do mais, essa biblioteca ajuda a evitar que você escrevar (ou reescreva) várias linhas de código para tratar filtros de pesquisa apliacados à sua consulta.
+
 ## Instalação
 
 Rode o comando 
 
 ```composer require laravellegends/eloquent-filter```
 
-## Exemplos:
+## Exemplos de uso:
+
+Existem duas maneiras de utilizar a biblioteca Eloquent Filter. 
+
+### Utilizando o trait `HasFilter`
+
+O trait `LaravelLegends\EloquentFilter\HasFilter` pode ser utilizado no model onde você deseja aplicar os filtros. Ao adicionar o `trait`, o método `filter` estará disponível.
+ 
+
+#### Exemplo
+Model:
+```php
+use LaravelLegends\EloquentFilter\HasFilter;
+
+class User extends Model
+{
+    use HasFilter;
+}
+```
+
+Controller:
+
 
 ```php
+use App\Models\User;
 
+class UsersController extends Controller
+{
+    public function index()
+    {
+        return User::filter()->paginate();
+    }
+
+    // ou
+
+    public function index()
+    {
+        return User::latest('id')->filter()->paginate();
+    }
+
+    // ou
+
+    public function index(Request $request)
+    {
+        return User::filter($request)->paginate();
+    }
+}
+```
+
+### Utilizando a classe `Filter`
+
+Você também pode utilizar a classe `Filter` diretamente para aplicar em suas consultas com eloquent.
+
+Veja:
+
+```php
 use App\Models\User;
 use Illuminate\Http\Request;
-use Illuminate\Routing\Controller;
 use LaravelLegends\EloquentFilter\Filter;
 
 class UsersController extends Controller
@@ -25,12 +81,25 @@ class UsersController extends Controller
 
         return $query->paginate();
     }
+
+    // ou
+
+    public function index(Request $request)
+    {
+        $query = User::orderBy('name');
+
+        Filter::make()->apply($query, $request);
+
+        return $query->paginate();
+    }
 }
 ```
 
+Note que, no segundo exemplo, precisamos passar uma instância de `Request`. Isso é muito útil em casos onde você queria utilizar as requests criadas por `make:request`.
 
-Faça a chamada `api/users?contains[name]=search+term`
 
+## Como funciona?
+Ao utilizar um dos exemplos acima, você pode fazer a seguinte chamada: `api/users?contains[name]=search+term`
 
 Ao fazer isso, o `Filter` esperará a passagem de parâmetros específicos para realizar filtros padrão na sua consulta.
 
@@ -122,9 +191,9 @@ A url `api/users?date_min[created_at]=2021-01-01` é equivalente a `User::whereD
 
 ## Exemplos com Axios
 
-Para quem utiliza `axios`, pode-se perfeitamente utilizar a opção `params` para incluir as buscas.
+Para quem utiliza `axios` para consumir uma API construida no Laravel, pode-se perfeitamente utilizar a opção `params` para incluir as buscas mostradas acima.
 
-Basta fazer:
+Exemplo:
 
 ```javascript
 const api = axios.create({
@@ -140,25 +209,3 @@ api.get('users', {
 })
 ```
 
-
-## Utilizando o trait `HasFilter`
-
-O `LaravelLegends\EloquentFilter\HasFilter` pode ser utilizado no model para facilitar as suas consultas.
-
-Basta adicioná-lo ao model, dessa forma:
-
-```php
-
-use LaravelLegends\EloquentFilter\HasFilter;
-
-class User extends Model
-{
-    use HasFilter;
-}
-
-User::filter()->get();
-// ou 
-User::filter($my_custom_request)->get();
-// ou
-User::orderBy('id')->filter()->get();
-```
