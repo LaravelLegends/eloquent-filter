@@ -2,8 +2,6 @@
 
 use LaravelLegends\EloquentFilter\Filter;
 
-use function Ramsey\Uuid\v1;
-
 class FilterTest extends Orchestra\Testbench\TestCase
 {
 	protected function getEnvironmentSetUp($app)
@@ -253,12 +251,12 @@ class FilterTest extends Orchestra\Testbench\TestCase
 	public function testSetRule()
 	{
 		request()->replace([
-			'date_max' => ['updated_at' => '2022-12-31']
+			'my_date_max' => ['updated_at' => '2022-12-31']
 		]);
 
 		$query = User::query();
 
-		Filter::make()->setRule('date_max', function ($query, $field, $value) {
+		Filter::make()->setRule('my_date_max', function ($query, $field, $value) {
 			$query->whereDate($field, '<=', $value);
 		})
 		->apply($query, request());
@@ -266,6 +264,8 @@ class FilterTest extends Orchestra\Testbench\TestCase
 		$expected_sql = 'select * from "users" where (strftime(\'%Y-%m-%d\', "updated_at") <= ?)';
 	
 		$this->assertTrue($query->toSql() === $expected_sql);
+
+		$this->assertContains('2022-12-31', $query->getBindings());
 	
 	}
 
@@ -280,5 +280,53 @@ class FilterTest extends Orchestra\Testbench\TestCase
 
 			$this->assertTrue($e instanceof \UnexpectedValueException);
 		}
+	}
+
+
+	public function testDateMax()
+	{
+		request()->replace([
+			'date_max' => ['posted_at' => '2025-12-30']
+		]);
+
+		Filter::make()->apply($query = User::query(), request());
+
+		$expected_sql = 'select * from "users" where (strftime(\'%Y-%m-%d\', "posted_at") <= ?)';
+	
+		$this->assertEquals($query->toSql(), $expected_sql);
+
+		$this->assertContains('2025-12-30', $query->getBindings());
+	
+	}
+
+	public function testDateMin()
+	{
+		request()->replace([
+			'date_min' => ['posted_at' => '1998-10-10']
+		]);
+
+		Filter::make()->apply($query = User::query(), request());
+
+		$expected_sql = 'select * from "users" where (strftime(\'%Y-%m-%d\', "posted_at") >= ?)';
+	
+		$this->assertEquals($query->toSql(), $expected_sql);
+
+		$this->assertContains('1998-10-10', $query->getBindings());
+	
+	}
+
+
+	public function testTraitHasFilter()
+	{
+
+		// api/users?contains[name]=Wallace
+		request()->replace([
+			'contains' => ['name' => 'Wallace'],
+		]);
+
+		$query = User::filter();
+
+		$this->assertEquals($query->toSql(), 'select * from "users" where ("name" LIKE ?)');
+
 	}
 }

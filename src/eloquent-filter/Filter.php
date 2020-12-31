@@ -21,6 +21,8 @@ class Filter
         'is_null'     => Rules\IsNull::class,
         'in'          => Rules\In::class,
         'not_in'      => Rules\NotIn::class,
+        'date_max'    => Rules\DateMax::class,
+        'date_min'    => Rules\DateMin::class
     ];
 
     /**
@@ -33,6 +35,13 @@ class Filter
         $query->where($this->getCallback($request));
 
         return $this;
+    }
+
+    public function applyWithoutNested(Builder $query, Request $request)
+    {
+        $this->getCallback($request)->__invoke($query);
+        
+        return $query;
     }
 
     /**
