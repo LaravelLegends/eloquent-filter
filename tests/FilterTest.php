@@ -181,8 +181,6 @@ class FilterTest extends Orchestra\Testbench\TestCase
 
 		$query = Filter::fromModel(User::class, request());
 
-		var_dump('select * from "users" where ("age" <= ? and "name" LIKE ?)', $query->toSql());
-
 		$this->assertTrue(
 			$query->toSql() == 'select * from "users" where ("age" <= ? and "name" LIKE ?)'
 		);
@@ -250,5 +248,37 @@ class FilterTest extends Orchestra\Testbench\TestCase
         $expected_sql = 'select * from "users" where ("role" in (?, ?) and "name" not in (?, ?))';
 
         $this->assertTrue($query->toSql() === $expected_sql);
-    }
+	}
+	
+	public function testSetRule()
+	{
+		request()->replace([
+			'date_max' => ['updated_at' => '2022-12-31']
+		]);
+
+		$query = User::query();
+
+		Filter::make()->setRule('date_max', function ($query, $field, $value) {
+			$query->whereDate($field, '<=', $value);
+		})
+		->apply($query, request());
+
+		$expected_sql = 'select * from "users" where (strftime(\'%Y-%m-%d\', "updated_at") <= ?)';
+	
+		$this->assertTrue($query->toSql() === $expected_sql);
+	
+	}
+
+	public function testSetRuleCatchException()
+	{
+		$filter = new Filter();
+		try  {
+
+			$filter->setRule('rule', 'invalid_value');
+
+		} catch (\Exception $e) {
+
+			$this->assertTrue($e instanceof \UnexpectedValueException);
+		}
+	}
 }

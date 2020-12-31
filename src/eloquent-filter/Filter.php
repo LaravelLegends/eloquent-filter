@@ -95,7 +95,10 @@ class Filter
     public function setRule($name, $rule) 
     {
         if ($rule instanceof Searchable || is_callable($rule)) {
+            
             $this->rules[$name] = $rule;
+
+            return $this;
         }
 
         throw new \UnexpectedValueException('The rule should be callable or instance of ' . Searchable::class);
