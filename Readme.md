@@ -105,3 +105,60 @@ Exemplo:
 A url `api/users?in[role][]=10&in[role][]=20` é equivalente à `User::whereIn('role', [10, 20])`
 
 **Observação**: Quando o `in[my_field]` for equivalente a um array vazio, nada será executado.
+
+## `date_max`
+Filtrar uma data através de um valor máximo.
+
+A url `api/users?date_max[created_at]=2021-01-01` é equivalente a `User::whereDate('created_at', '<=', '2021-01-01')`
+
+## `date_min`
+
+Filtra um campo de data através de um valor mínimo.
+
+Exemplo:
+
+A url `api/users?date_min[created_at]=2021-01-01` é equivalente a `User::whereDate('created_at', '>=', '2021-01-01')`
+
+
+## Exemplos com Axios
+
+Para quem utiliza `axios`, pode-se perfeitamente utilizar a opção `params` para incluir as buscas.
+
+Basta fazer:
+
+```javascript
+const api = axios.create({
+    baseURL: 'http://localhost:8000/api'
+});
+
+api.get('users', {
+    params: { 
+        'in[role]' : [1, 2, 3],
+        'contains[name]' : 'Maxters',
+        'is_null[name]' : 0
+    }
+})
+```
+
+
+## Utilizando o trait `HasFilter`
+
+O `LaravelLegends\EloquentFilter\HasFilter` pode ser utilizado no model para facilitar as suas consultas.
+
+Basta adicioná-lo ao model, dessa forma:
+
+```php
+
+use LaravelLegends\EloquentFilter\HasFilter;
+
+class User extends Model
+{
+    use HasFilter;
+}
+
+User::filter()->get();
+// ou 
+User::filter($my_custom_request)->get();
+// ou
+User::orderBy('id')->filter()->get();
+```

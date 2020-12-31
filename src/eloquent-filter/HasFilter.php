@@ -3,6 +3,7 @@
 namespace LaravelLegends\EloquentFilter;
 
 use Illuminate\Http\Request;
+use LaravelLegends\EloquentFilter\Filter;
 
 trait HasFilter
 {
