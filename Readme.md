@@ -100,8 +100,9 @@ Note que, no segundo exemplo, precisamos passar uma instância de `Request`. Iss
 
 ## Como funciona?
 Ao utilizar um dos exemplos acima, você pode fazer a seguinte chamada: `api/users?contains[name]=search+term`
-
 Ao fazer isso, o `Filter` esperará a passagem de parâmetros específicos para realizar filtros padrão na sua consulta.
+
+Por exemplo, `contains` representa a regra de filtro utilizado internamente. `name` trata-se do campo onde o filtro será aplicado. `search+term` trata-se o valor desse campo.
 
 Veja a relação de parâmetros que podem ser utilizados na consulta:
 
