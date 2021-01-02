@@ -19,12 +19,7 @@ class FilterTest extends Orchestra\Testbench\TestCase
 
     public function testGetCallback()
     {
-
-        $filter = new Filter();
-
-        $query = User::query();
-
-        $callback = $filter->getCallback(request());
+        $callback = Filter::make()->getCallback(request());
 
         $this->assertTrue($callback instanceof \Closure);
     }
@@ -32,13 +27,12 @@ class FilterTest extends Orchestra\Testbench\TestCase
 
     public function testApplyMax()
     {
-        $query = User::query();
-
+        
         request()->replace([
             'max' => ['age' => '18']
         ]);
 
-        (new Filter())->apply($query, request());
+        Filter::make()->apply($query = User::query(), request());
 
         $this->assertTrue($query->toSql() === 'select * from "users" where ("age" <= ?)');
 
@@ -52,9 +46,7 @@ class FilterTest extends Orchestra\Testbench\TestCase
             'min' => ['likes' => '500']
         ]);
 
-        $query = User::query();
-
-        (new Filter())->apply($query, request());
+        Filter::make()->apply($query = User::query(), request());
 
         $this->assertTrue($query->toSql() === 'select * from "users" where ("likes" >= ?)');
 
@@ -67,9 +59,7 @@ class FilterTest extends Orchestra\Testbench\TestCase
             'exact' => ['name' => 'wallace', 'active' => '1']
         ]);
 
-        $query = User::query();
-
-        (new Filter())->apply($query, request());
+        Filter::make()->apply($query = User::query(), request());
 
         $this->assertTrue($query->toSql() === 'select * from "users" where ("name" = ? and "active" = ?)');
 
@@ -86,10 +76,7 @@ class FilterTest extends Orchestra\Testbench\TestCase
             'contains' => ['name' => 'wallace']
         ]);
 
-        $query = User::query();
-
-        (new Filter())->apply($query, request());
-
+        Filter::make()->apply($query = User::query(), request());
 
         $this->assertTrue($query->toSql() === 'select * from "users" where ("name" LIKE ?)');
 
@@ -104,9 +91,7 @@ class FilterTest extends Orchestra\Testbench\TestCase
             'ends_with' => ['name' => 'guilherme']
         ]);
 
-        $query = User::query();
-
-        (new Filter())->apply($query, request());
+        Filter::make()->apply($query = User::query(), request());
 
         $this->assertTrue($query->toSql() === 'select * from "users" where ("name" LIKE ?)');
 
@@ -122,15 +107,11 @@ class FilterTest extends Orchestra\Testbench\TestCase
             'starts_with' => ['nick' => 'brcontainer']
         ]);
 
-        $query = User::query();
-
-        (new Filter())->apply($query, request());
+        Filter::make()->apply($query = User::query(), request());
 
         $this->assertTrue($query->toSql() === 'select * from "users" where ("nick" LIKE ?)');
 
-        $bindings = $query->getBindings();
-        
-        $this->assertContains('brcontainer%', $bindings);
+        $this->assertContains('brcontainer%', $query->getBindings());
     }
 
 
@@ -195,9 +176,8 @@ class FilterTest extends Orchestra\Testbench\TestCase
             'in' => ['role_id' => ['1', '2']]
         ]);
 
-        $query = User::query();
 
-        (new Filter())->apply($query, request());
+        Filter::make()->apply($query = User::query(), request());
 
         $expected_sql = 'select * from "users" where ("role_id" in (?, ?))';
 
@@ -250,21 +230,21 @@ class FilterTest extends Orchestra\Testbench\TestCase
     public function testSetRule()
     {
         request()->replace([
-            'my_date_max' => ['updated_at' => '2022-12-31']
+            'between' => ['age' => [18, 65]]
         ]);
 
         $query = User::query();
 
-        Filter::make()->setRule('my_date_max', function ($query, $field, $value) {
-            $query->whereDate($field, '<=', $value);
+        Filter::make()->setRule('between', function ($query, $field, $value) {
+            $query->where($field, '>=', $value[0])->where($field, '<=', $value[1]);
         })
         ->apply($query, request());
 
-        $expected_sql = 'select * from "users" where (strftime(\'%Y-%m-%d\', "updated_at") <= ?)';
+        $expected_sql = 'select * from "users" where ("age" >= ? and "age" <= ?)';
     
-        $this->assertTrue($query->toSql() === $expected_sql);
+        $this->assertEquals($query->toSql(), $expected_sql);
 
-        $this->assertContains('2022-12-31', $query->getBindings());
+        // $this->assertContains('2022-12-31', $query->getBindings());
     
     }
 
@@ -284,6 +264,7 @@ class FilterTest extends Orchestra\Testbench\TestCase
 
     public function testDateMax()
     {
+
         request()->replace([
             'date_max' => ['posted_at' => '2025-12-30']
         ]);
@@ -291,7 +272,11 @@ class FilterTest extends Orchestra\Testbench\TestCase
         Filter::make()->apply($query = User::query(), request());
 
         $expected_sql = 'select * from "users" where (strftime(\'%Y-%m-%d\', "posted_at") <= ?)';
-    
+
+        if (app()->version() >= 6) {
+            $expected_sql = 'select * from "users" where (strftime(\'%Y-%m-%d\', "posted_at") <= cast(? as text))';
+        }
+
         $this->assertEquals($query->toSql(), $expected_sql);
 
         $this->assertContains('2025-12-30', $query->getBindings());
@@ -300,6 +285,8 @@ class FilterTest extends Orchestra\Testbench\TestCase
 
     public function testDateMin()
     {
+
+        
         request()->replace([
             'date_min' => ['posted_at' => '1998-10-10']
         ]);
@@ -307,6 +294,9 @@ class FilterTest extends Orchestra\Testbench\TestCase
         Filter::make()->apply($query = User::query(), request());
 
         $expected_sql = 'select * from "users" where (strftime(\'%Y-%m-%d\', "posted_at") >= ?)';
+        if (app()->version() >= 6) {
+            $expected_sql = 'select * from "users" where (strftime(\'%Y-%m-%d\', "posted_at") >= cast(? as text))';
+        }
     
         $this->assertEquals($query->toSql(), $expected_sql);
 
@@ -326,6 +316,34 @@ class FilterTest extends Orchestra\Testbench\TestCase
         $query = User::filter();
 
         $this->assertEquals($query->toSql(), 'select * from "users" where ("name" LIKE ?)');
+
+    }
+
+
+    public function testCustomRequest()
+    {   
+
+
+        $request = CustomRequest::create('/users', 'GET', [
+            'contains' => [
+                'name' => 'Maxters'
+            ],
+            'max' => [
+                'price' => 1,
+                'not_used' => 0.5
+            ],
+            'min' => [
+                'price' => 1,
+            ]
+        ]);
+
+        Filter::make()->apply($query = User::query(), $request);
+
+        $this->assertEquals($query->toSql(), 'select * from "users" where ("name" LIKE ? and "price" >= ?)');
+
+        $this->assertContains('%Maxters%', $bindings = $query->getBindings());
+        $this->assertContains(1, $bindings);
+
 
     }
 }

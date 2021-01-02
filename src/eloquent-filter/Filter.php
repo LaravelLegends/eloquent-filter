@@ -3,8 +3,8 @@
 namespace LaravelLegends\EloquentFilter;
 
 use Illuminate\Http\Request;
-use Illuminate\Database\Eloquent\Builder;
 use LaravelLegends\EloquentFilter\Rules;
+use Illuminate\Database\Eloquent\Builder;
 use LaravelLegends\EloquentFilter\Rules\Searchable;
 
 /**
@@ -74,11 +74,21 @@ class Filter
      * 
      * @return array
      */
-    protected function getRulesFromRequest(Request $request)
+    public function getRulesFromRequest(Request $request)
     {
-        $params = array_keys($this->rules);
+        if (method_exists($request, 'validated')) {
+            return $request->validated();
+        }
 
-        return $request->only($params);
+        // Any laravel version with FormRequest implemented, but not exists "validated"
+
+        elseif ($request instanceof \Illuminate\Foundation\Http\FormRequest) {
+            return $request->only(
+                array_keys($request->rules())
+            );
+        }
+
+        return $request->only(array_keys($this->rules));
     }
 
     /**
@@ -95,7 +105,10 @@ class Filter
         $rule = $this->getRuleAsCallable($name);
 
         foreach ($fields as $field => $value) {
-            $this->isEmpty($value) || $rule($query, $field, $value);
+
+            if ($this->isEmpty($value)) continue;
+
+            $rule($query, $field, $value);
         }
 
         return $this;
@@ -175,6 +188,6 @@ class Filter
 
     public static function make()
     {
-        return new static;
+        return new static();
     }
 }
