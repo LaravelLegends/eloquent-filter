@@ -76,16 +76,19 @@ class Filter
      */
     public function getRulesFromRequest(Request $request)
     {
-        if (method_exists($request, 'validated')) {
-            return $request->validated();
-        }
 
-        // Any laravel version with FormRequest implemented, but not exists "validated"
+        if ($request instanceof \Illuminate\Foundation\Http\FormRequest) {
 
-        elseif ($request instanceof \Illuminate\Foundation\Http\FormRequest) {
-            return $request->only(
-                array_keys($request->rules())
-            );
+            $rules = [];
+
+            foreach ($request->only(array_keys($request->rules())) as $key => $rule) {
+
+                if (! $this->hasRule($key)) continue;
+                
+                $rules[$key] = $rule;
+            }
+
+            return $rules;
         }
 
         return $request->only(array_keys($this->rules));
@@ -124,6 +127,17 @@ class Filter
     public function getRule($name)
     {
         return $this->rules[$name];
+    }
+
+
+    /**
+     * Check if contains rule by name
+     * @return boolean
+     */
+
+    public function hasRule($name)
+    {
+        return isset($this->rules[$name]);
     }
 
     /**

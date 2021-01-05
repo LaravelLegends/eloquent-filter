@@ -8,7 +8,8 @@ class CustomRequest extends FormRequest
     {
         return [
             'contains.name' => 'string',
-            'min.price'     => 'numeric'
+            'min.price'     => 'numeric',
+            'x'             => 'nullable',
         ];
     }
 }

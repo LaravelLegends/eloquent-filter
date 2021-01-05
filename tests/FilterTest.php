@@ -334,7 +334,9 @@ class FilterTest extends Orchestra\Testbench\TestCase
             ],
             'min' => [
                 'price' => 1,
-            ]
+            ],
+
+            'x' => ['y' => 1]
         ]);
 
         Filter::make()->apply($query = User::query(), $request);
