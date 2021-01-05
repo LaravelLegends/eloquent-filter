@@ -190,6 +190,15 @@ Exemplo:
 A url `api/users?date_min[created_at]=2021-01-01` é equivalente a `User::whereDate('created_at', '>=', '2021-01-01')`
 
 
+## `not_equal`
+
+Aplica um filtro utilizando o operador "não igual".
+
+Exemplo:
+
+A url `api/users?not_equal[profile_id]=3` é equivalente a `User::where('profile_id', '<>', '3')`
+
+
 ## Exemplos com Axios
 
 Para quem utiliza `axios` para consumir uma API construida no Laravel, pode-se perfeitamente utilizar a opção `params` para incluir as buscas mostradas acima.
