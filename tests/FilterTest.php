@@ -304,6 +304,34 @@ class FilterTest extends Orchestra\Testbench\TestCase
     
     }
 
+    public function testNotEqual()
+    {
+
+        request()->replace([
+            'not_equal' => ['profile_id' => '3']
+        ]);
+
+        Filter::make()->apply($query = User::query(), request());
+
+        $this->assertEquals($query->toSql(), 'select * from "users" where ("profile_id" <> ?)');
+
+        $this->assertContains('3', $query->getBindings());
+    }
+
+    public function testWithoutNested()
+    {
+
+        request()->replace([
+            'not_equal' => ['profile_id' => '7']
+        ]);
+
+        Filter::make()->applyWithoutNested($query = User::query(), request());
+
+        $this->assertEquals($query->toSql(), 'select * from "users" where "profile_id" <> ?');
+
+        $this->assertContains('7', $query->getBindings());
+    }
+
 
     public function testTraitHasFilter()
     {

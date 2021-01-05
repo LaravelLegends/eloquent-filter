@@ -27,7 +27,8 @@ class Filter
         'in'          => Rules\In::class,
         'not_in'      => Rules\NotIn::class,
         'date_max'    => Rules\DateMax::class,
-        'date_min'    => Rules\DateMin::class
+        'date_min'    => Rules\DateMin::class,
+        'not_equal'   => Rules\NotEqual::class,
     ];
 
     /**
