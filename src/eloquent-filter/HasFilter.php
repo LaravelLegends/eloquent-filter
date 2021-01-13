@@ -13,8 +13,13 @@ trait HasFilter
 {
     public function scopeFilter($query, Request $request = null)
     {
-        Filter::make()->apply($query, $request ?: request());
+        $this->getEloquentFilter()->apply($query, $request ?: request());
         
         return $query;
+    }
+
+    public function getEloquentFilter()
+    {
+        return app(Filter::class);
     }
 }
