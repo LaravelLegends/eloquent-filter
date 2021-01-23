@@ -348,6 +348,26 @@ class FilterTest extends Orchestra\Testbench\TestCase
     }
 
 
+    public function testRelationParse()
+    {
+
+        request()->replace([
+            'exact'    => ['phones.country' => '55'],
+            'contains' => ['phones.number' => '4321', 'phones.ddd' => '32']
+        ]);
+
+        Filter::make()->apply($query = User::query(), request());
+
+        $expected_sql = 'select * from "users" where (exists (select * from "user_phones" where "users"."id" = "user_phones"."user_id" and "number" LIKE ? and "ddd" LIKE ? and "country" = ?))';
+
+        $this->assertEquals($query->toSql(), $expected_sql);
+
+        $this->assertContains('%4321%', $bindings = $query->getBindings());
+        $this->assertContains('%32%', $bindings);
+        $this->assertContains('55', $bindings);
+    }
+
+
     public function testCustomRequest()
     {   
 

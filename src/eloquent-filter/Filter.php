@@ -15,6 +15,8 @@ use LaravelLegends\EloquentFilter\Rules\Searchable;
 class Filter
 {
 
+    protected $relation_separator = '.';
+
     protected $rules = [
         'max'         => Rules\Max::class,
         'min'         => Rules\Min::class,
@@ -61,9 +63,19 @@ class Filter
         $rules = $this->getRulesFromRequest($request);
         
         return function ($query) use($rules) {
-            
-            foreach ($rules as $rule_name => $fields) {
-                $fields && $this->applyRule($query, $rule_name, $fields);
+
+            list($base_rules, $related) = $this->getGroupedRules($rules);
+
+            foreach ($base_rules as $rule => $fields) {
+                $this->applyRule($query, $rule, $fields);
+            }
+
+            foreach ($related as $relation => $rules) {
+                $query->whereHas($relation, function ($subquery) use($rules) {
+                    foreach ($rules as $rule => $fields) {
+                        $this->applyRule($subquery, $rule, $fields);
+                    }
+                });
             }
             
             return $query;
@@ -181,6 +193,82 @@ class Filter
     {
         return $value === '' || $value === [];
     }
+
+    /**
+     * Get parsed data if field contains a expession than represents a relationship
+     * @param string $field
+     * @return array
+     * 
+     */ 
+    protected function parseRelation($field)
+    {
+        $parts = explode($this->relation_separator, $field);
+
+        return [array_pop($parts), implode($this->relation_separator, $parts)];
+    }
+
+    /**
+     * Check if field expression contains a relationship
+     * @return boolean
+     */
+    protected function containsRelation($field)
+    {
+        $index = strpos($field, $this->relation_separator);
+
+        return $index > 0;
+    }
+    
+    /**
+     * Gets the separated group of rules with normal fields and related fields
+     * @param array $rules
+     * 
+     * @return array
+     */
+    protected function getGroupedRules(array $rules)
+    {
+        $base = $related = [];
+
+        foreach ($rules as $name => $fields) {
+
+            if (! $fields) continue;
+
+            list($base[$name], $related_fields) = $this->getGroupedFields($fields);
+
+            foreach ($related_fields as $relation => $value) {
+                $related[$relation][$name] = $value;
+            }
+        }
+
+        return [$base, $related];
+    }
+    
+    /**
+     * Get grouped field by relations and base
+     * 
+     * @param array $fields
+     * @return array
+     */
+    protected function getGroupedFields(array $fields)
+    {
+        $related = $base = [];
+
+        foreach ($fields as $field => $value) {
+
+            if ($this->containsRelation($field)) {
+
+                list($field, $relation) = $this->parseRelation($field);
+                
+                $related[$relation][$field] = $value;
+
+                continue;
+            }
+
+            $base[$field] = $value;
+        }
+
+        return [$base, $related];
+    }
+
 
     /**
      * Apply filter directly in model
