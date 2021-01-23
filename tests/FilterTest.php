@@ -1,5 +1,6 @@
 <?php
 
+use LaravelLegends\EloquentFilter\Exceptions\RestrictionException;
 use LaravelLegends\EloquentFilter\Filter;
 
 class FilterTest extends Orchestra\Testbench\TestCase
@@ -345,6 +346,47 @@ class FilterTest extends Orchestra\Testbench\TestCase
 
         $this->assertEquals($query->toSql(), 'select * from "users" where ("name" LIKE ?)');
 
+    }
+
+
+    public function testRestriction()
+    {
+
+        // api/users?contains[name]=Wallace
+        request()->replace([
+            'contains' => ['name' => 'Wallace'],
+        ]);
+
+        $query = User::filter();
+
+        $this->assertEquals($query->toSql(), 'select * from "users" where ("name" LIKE ?)');
+
+
+        request()->replace([
+            'exact' => ['name' => 'Wallace'],
+        ]);
+
+        try {
+            $query = User::filter();
+        } catch(RestrictionException $e) {
+            $this->assertEquals($e->getMessage(), 'Cannot use filter "name" field with rule "exact"');
+        }
+
+    
+        request()->replace([
+            'max' => ['name' => 'Wallace'],
+        ]);
+
+        $filter = (new Filter)->restrict(['name' => ['contains']]);
+
+        try {
+            $filter->apply(User::query(), request());
+        } catch(RestrictionException $e) {
+            $this->assertEquals($e->getMessage(), 'Cannot use filter "name" field with rule "max"');
+        }
+
+        $filter->unrestricted()->apply(User::query(), request());
+        // no exception    
     }
 
 

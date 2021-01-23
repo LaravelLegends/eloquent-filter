@@ -8,6 +8,10 @@ class User extends Model
 
     protected $table = 'users';
 
+    public $filterRestrictions = [
+        'name' => 'contains',
+    ];
+
     public function phones()
     {
         return $this->hasMany(UserPhone::class);

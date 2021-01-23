@@ -13,7 +13,14 @@ trait HasFilter
 {
     public function scopeFilter($query, Request $request = null)
     {
-        $this->getEloquentFilter()->apply($query, $request ?: request());
+
+        $filter = $this->getEloquentFilter();
+
+        if (isset($this->filterRestrictions)) {
+            $filter->restrict($this->filterRestrictions);
+        }
+        
+        $filter->apply($query, $request ?: request())->unrestricted();
         
         return $query;
     }

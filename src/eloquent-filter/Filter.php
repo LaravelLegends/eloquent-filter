@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use LaravelLegends\EloquentFilter\Rules;
 use Illuminate\Database\Eloquent\Builder;
 use LaravelLegends\EloquentFilter\Rules\Searchable;
+use LaravelLegends\EloquentFilter\Exceptions\RestrictionException;
 
 /**
  * This class creates query filters based on request
@@ -14,8 +15,6 @@ use LaravelLegends\EloquentFilter\Rules\Searchable;
  */
 class Filter
 {
-
-    protected $relation_separator = '.';
 
     protected $rules = [
         'max'         => Rules\Max::class,
@@ -32,6 +31,11 @@ class Filter
         'date_min'    => Rules\DateMin::class,
         'not_equal'   => Rules\NotEqual::class,
     ];
+
+
+    protected $relation_separator = '.';
+
+    protected $restrictions = null;
 
     /**
      * 
@@ -61,10 +65,10 @@ class Filter
     public function getCallback(Request $request)
     {
         $rules = $this->getRulesFromRequest($request);
-        
-        return function ($query) use($rules) {
 
-            list($base_rules, $related) = $this->getGroupedRules($rules);
+        list($base_rules, $related) = $this->getGroupedRules($rules);
+
+        return function ($query) use($base_rules, $related) {
 
             foreach ($base_rules as $rule => $fields) {
                 $this->applyRule($query, $rule, $fields);
@@ -101,10 +105,19 @@ class Filter
                 $rules[$key] = $rule;
             }
 
+            
             return $rules;
+
         }
 
-        return $request->only(array_keys($this->rules));
+        $rules = array_filter(
+            $request->only(array_keys($this->rules))
+        );
+
+        $this->checkRestrictions($rules);
+
+        return $rules;
+
     }
 
     /**
@@ -269,6 +282,61 @@ class Filter
         return [$base, $related];
     }
 
+
+    /**
+     * Define a list of allowed field and rules
+     * 
+     * @param array $restriction
+     * @return self
+     */
+    public function restrict(array $restrictions)
+    {
+        $this->restrictions = $restrictions; 
+
+        return $this;
+    }
+
+    /**
+     * Remove restriction
+     * 
+     * @return self 
+     */ 
+    public function unrestricted()
+    {
+        $this->restrictions = null;
+
+        return $this;
+    }
+
+
+    /**
+     * Check if filter contains restrictions
+     */
+
+    protected function checkRestrictions(array $rules)
+    {
+        if ($this->restrictions === null) return;
+
+        foreach ($rules as $rule => $fields) {
+
+            foreach (array_keys($fields) as $field) {
+
+                if (! isset($this->restrictions[$field])) {
+                    throw new RestrictionException(sprintf('Cannot use filter with "%s" field', $field));
+                }
+
+                $restriction = $this->restrictions[$field];
+
+                if (in_array($restriction, ['*', true], true) || in_array($rule, (array) $restriction))
+                {
+                    continue;
+                }
+
+                throw new RestrictionException(sprintf('Cannot use filter "%s" field with rule "%s"', $field, $rule));
+            }
+        }
+        
+    }
 
     /**
      * Apply filter directly in model
