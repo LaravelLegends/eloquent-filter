@@ -39,8 +39,8 @@ Controller:
 ```php
 use App\Models\User;
 
-class UsersController extends Controller
 {
+    class UsersController extends Controller
     public function index()
     {
         return User::filter()->paginate();
@@ -199,6 +199,31 @@ Exemplo:
 A url `api/users?not_equal[profile_id]=3` é equivalente a `User::where('profile_id', '<>', '3')`
 
 
+## Filtrando campos de relacionamentos
+
+É possível aplicar os filtros de pesquisa desta biblioteca nos relacionamentos definidos no seu Model.
+
+Por exemplo:
+
+```php
+class User
+{
+    use HasFilter;
+
+    public function phones()
+    {
+        return $this->hasMany(Phone::class, 'user_id');
+    }
+}
+
+```
+
+Você poderia buscar os usuários que possua um telefone com código do país como 55. É necessário apenas chamar o método relacionado ao model mais o campo, separado por ponto.
+
+Veja:
+
+```api/users?exact[phones.number]=55```
+
 ## Exemplos com Axios
 
 Para quem utiliza `axios` para consumir uma API construida no Laravel, pode-se perfeitamente utilizar a opção `params` para incluir as buscas mostradas acima.
@@ -219,3 +244,64 @@ api.get('users', {
 })
 ```
 
+
+## Restrição de campos
+
+É possível configurar o filtro para ele aceitar apenas determinados campos. Isso permite especificar melhor os campos que podem ser filtrados.
+Você só precisa passar um `array` contedo as seguintes especificações:
+
+```php
+[
+    'name' => 'contains' // só aceita "contains" para o campo "name",
+    'created_at' => ['date_min', 'date_max'] // aceita os dois filtros para o campo "created_at",
+    'phones.number' => true, // Aceita qualquer filtro para o campo "number" do relacionamento "phones()"
+    'profile_id'  => '*' // Aceita qualquer filtro para o campo profile_id
+]
+```
+
+Você pode fazer isso de duas formas. 
+
+### Restrição de campos filtrados no Model
+
+No model, você apenas precisar definir a propriedade `$filterRestrictions` com as restrições necessárias
+
+```php
+use LaravelLegends\EloquentFilter\HasFilter;
+
+class User extends Model
+{
+    use HasFilter;
+
+    protected $filterRestrictions = [
+        'name'         => 'contains',
+        'phone.number' => 'contains',
+        'price'        => ['max', 'min'],
+        'profile_id'   => '*',
+    ];
+}
+```
+
+
+### Usando o método restrict
+
+```php
+$restriction = [
+    'name' => 'contains'
+];
+
+$query = User::query();
+
+(new Filter)->restrict($restriction)->apply($query, $request)
+```
+
+### Usando Filter::fromModel
+
+```php
+$restriction = [
+    'name' => 'contains'
+];
+
+$query = Filter::fromModel(User::class, $request, $restriction);
+
+return $query->paginate();
+```

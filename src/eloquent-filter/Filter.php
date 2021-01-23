@@ -311,6 +311,9 @@ class Filter
 
     /**
      * Check if filter contains restrictions
+     * 
+     * @throws \LaravelLegends\EloquentFilter\Exceptions\RestrictionException
+     * @return void
      */
 
     protected function checkRestrictions(array $rules)
@@ -343,15 +346,20 @@ class Filter
      * 
      * @param string Model class
      * @param \Illuminate\Http\Request $request
+     * @param array|null $restriction
      * @return \Illuminate\Database\Eloquent\Builder
      */
-    public static function fromModel($model, Request $request)
+    public static function fromModel($model, Request $request, array $restrictions = null)
     {
         if (! is_subclass_of($model, \Illuminate\Database\Eloquent\Model::class)) {
             throw new \InvalidArgumentException('Only models can be passed by parameter');
         }
 
-        static::make()->apply($query = $model::query(), $request);
+        $filter = new static;
+
+        $restrictions && $filter->restrict($restrictions);
+
+        $filter->apply($query = $model::query(), $request);
 
         return $query;
     }
