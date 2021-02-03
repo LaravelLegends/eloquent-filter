@@ -93,31 +93,7 @@ class Filter
      */
     public function getRulesFromRequest(Request $request)
     {
-
-        if ($request instanceof \Illuminate\Foundation\Http\FormRequest) {
-
-            $rules = [];
-
-            foreach ($request->only(array_keys($request->rules())) as $key => $rule) {
-
-                if (! $this->hasRule($key)) continue;
-                
-                $rules[$key] = $rule;
-            }
-
-            
-            return $rules;
-
-        }
-
-        $rules = array_filter(
-            $request->only(array_keys($this->rules))
-        );
-
-        $this->checkRestrictions($rules);
-
-        return $rules;
-
+        return $request->only(array_keys($this->rules));
     }
 
     /**
@@ -147,7 +123,6 @@ class Filter
      * Gets the rule by name
      * 
      * @param string $name
-     * 
      * @return string|Closure
      */
     public function getRule($name)
@@ -158,6 +133,8 @@ class Filter
 
     /**
      * Check if contains rule by name
+     * 
+     * @param string $name
      * @return boolean
      */
 
@@ -189,6 +166,8 @@ class Filter
      * Get the rule as callable
      * 
      * @param string $name
+     * 
+     * @return callable
      */
     public function getRuleAsCallable($name)
     {
@@ -358,15 +337,9 @@ class Filter
         $filter = new static;
 
         $restrictions && $filter->restrict($restrictions);
-
+        
         $filter->apply($query = $model::query(), $request);
 
         return $query;
-    }
-
-
-    public static function make()
-    {
-        return new static();
     }
 }
