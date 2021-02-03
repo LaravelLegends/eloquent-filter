@@ -16,6 +16,9 @@ use LaravelLegends\EloquentFilter\Exceptions\RestrictionException;
 class Filter
 {
 
+    /**
+     * @var array
+     */
     protected $rules = [
         'max'         => Rules\Max::class,
         'min'         => Rules\Min::class,
@@ -32,12 +35,18 @@ class Filter
         'not_equal'   => Rules\NotEqual::class,
     ];
 
-
+    /**
+     * @var string
+     */
     protected $relation_separator = '.';
 
-    protected $restrictions = null;
+    /**
+     * @var array
+     */
+    protected $restrictions = [];
 
     /**
+     * Apply the filter based on request
      * 
      * @param \Illuminate\Database\Eloquent\Builder $query
      * @param \Illuminate\Http\Request $request
@@ -49,6 +58,10 @@ class Filter
         return $this;
     }
 
+    /**
+     * Apply the filter based on request without nested where
+     * 
+     */
     public function applyWithoutNested(Builder $query, Request $request)
     {
         $this->getCallback($request)->__invoke($query);
@@ -276,28 +289,26 @@ class Filter
     }
 
     /**
-     * Remove restriction
+     * Remove restrictions
      * 
      * @return self 
      */ 
     public function unrestricted()
     {
-        $this->restrictions = null;
+        $this->restrictions = [];
 
         return $this;
     }
-
 
     /**
      * Check if filter contains restrictions
      * 
      * @throws \LaravelLegends\EloquentFilter\Exceptions\RestrictionException
      * @return void
-     */
-
+    */
     protected function checkRestrictions(array $rules)
     {
-        if ($this->restrictions === null) return;
+        if (empty($this->restrictions)) return;
 
         foreach ($rules as $rule => $fields) {
 
@@ -309,8 +320,7 @@ class Filter
 
                 $restriction = $this->restrictions[$field];
 
-                if (in_array($restriction, ['*', true], true) || in_array($rule, (array) $restriction))
-                {
+                if (in_array($restriction, ['*', true], true) || in_array($rule, (array) $restriction)) {
                     continue;
                 }
 
@@ -328,7 +338,7 @@ class Filter
      * @param array|null $restriction
      * @return \Illuminate\Database\Eloquent\Builder
      */
-    public static function fromModel($model, Request $request, array $restrictions = null)
+    public static function fromModel($model, Request $request, array $restrictions = [])
     {
         if (! is_subclass_of($model, \Illuminate\Database\Eloquent\Model::class)) {
             throw new \InvalidArgumentException('Only models can be passed by parameter');
