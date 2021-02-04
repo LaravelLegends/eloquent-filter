@@ -88,7 +88,7 @@ class UsersController extends Controller
     {
         $query = User::orderBy('name');
 
-        Filter::make()->apply($query, $request);
+        (new Filter)->apply($query, $request);
 
         return $query->paginate();
     }
