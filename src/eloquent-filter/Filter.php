@@ -201,9 +201,9 @@ class Filter
 
     /**
      * Get parsed data if field contains a expession than represents a relationship
+     * 
      * @param string $field
      * @return array
-     * 
      */ 
     protected function parseRelation($field)
     {
@@ -214,6 +214,7 @@ class Filter
 
     /**
      * Check if field expression contains a relationship
+     * 
      * @return boolean
      */
     protected function containsRelation($field)
@@ -225,8 +226,8 @@ class Filter
     
     /**
      * Gets the separated group of rules with normal fields and related fields
-     * @param array $rules
      * 
+     * @param array $rules
      * @return array
      */
     protected function getGroupedRules(array $rules)
