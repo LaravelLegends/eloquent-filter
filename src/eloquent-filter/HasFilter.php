@@ -20,7 +20,7 @@ trait HasFilter
             $filter->restrict($this->filterRestrictions);
         }
         
-        $filter->apply($query, $request ?: request())->unrestricted();
+        $filter->apply($query, $request ?: app('request'))->unrestricted();
         
         return $query;
     }
