@@ -337,10 +337,11 @@ class Filter
     {
 
         if (!isset($this->restrictions[$field])) {
-            throw new RestrictionException(sprintf('Cannot use filter with "%s" field', $field));
-        }
 
-        if (in_array($this->restrictions[$field], ['*', true], true) || in_array($rule, (array) $this->restrictions[$field])) {
+            throw new RestrictionException(sprintf('Cannot use filter with "%s" field', $field));
+
+        } elseif (in_array($this->restrictions[$field], ['*', true], true) || in_array($rule, (array) $this->restrictions[$field])) {
+            
             return;
         }
 
