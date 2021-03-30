@@ -106,7 +106,11 @@ class Filter
      */
     public function getRulesFromRequest(Request $request)
     {
-        return $request->only(array_keys($this->rules));
+        $rules = $request->only(array_keys($this->rules));
+        
+        $this->checkRestrictions($rules);
+
+        return $rules;
     }
 
     /**
@@ -315,20 +319,32 @@ class Filter
 
             foreach (array_keys($fields) as $field) {
 
-                if (! isset($this->restrictions[$field])) {
-                    throw new RestrictionException(sprintf('Cannot use filter with "%s" field', $field));
-                }
+                $this->checkFieldRestriction($rule, $field);
 
-                $restriction = $this->restrictions[$field];
-
-                if (in_array($restriction, ['*', true], true) || in_array($rule, (array) $restriction)) {
-                    continue;
-                }
-
-                throw new RestrictionException(sprintf('Cannot use filter "%s" field with rule "%s"', $field, $rule));
             }
         }
         
+    }
+
+    /**
+     * 
+     * @param string $field
+     * @param string $rule
+     * @throws \LaravelLegends\EloquentFilter\Exceptions\RestrictionException
+     * @return void
+     */
+    protected function checkFieldRestriction($rule, $field)
+    {
+
+        if (!isset($this->restrictions[$field])) {
+            throw new RestrictionException(sprintf('Cannot use filter with "%s" field', $field));
+        }
+
+        if (in_array($this->restrictions[$field], ['*', true], true) || in_array($rule, (array) $this->restrictions[$field])) {
+            return;
+        }
+
+        throw new RestrictionException(sprintf('Cannot use filter "%s" field with rule "%s"', $field, $rule));
     }
 
     /**
