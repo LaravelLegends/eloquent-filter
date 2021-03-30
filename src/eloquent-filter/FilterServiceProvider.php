@@ -8,7 +8,7 @@ class FilterServiceProvider extends ServiceProvider
 {
     public function register()
     {
-        $this->app->bind(\LaravelLegends\EloquentFilter\Filter::class, static function () {
+        $this->app->singleton(\LaravelLegends\EloquentFilter\Filter::class, static function () {
             return new Filter;
         });
     }
