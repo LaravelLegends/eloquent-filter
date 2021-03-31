@@ -106,10 +106,10 @@ class Filter
      */
     public function getRulesFromRequest(Request $request)
     {
-        $rules = $request->only(array_keys($this->rules));
-        
-        $this->checkRestrictions($rules);
+        $rules = array_filter($request->only(array_keys($this->rules)), 'is_array');
 
+        $this->checkRestrictions($rules);
+        
         return $rules;
     }
 
