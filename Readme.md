@@ -37,10 +37,10 @@ Controller:
 
 
 ```php
-use App\Models\User;
+class UsersController extends Controller {
 
-{
-    class UsersController extends Controller
+    use App\Models\User;
+    
     public function index()
     {
         return User::filter()->paginate();
