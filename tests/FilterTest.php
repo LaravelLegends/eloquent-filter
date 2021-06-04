@@ -2,6 +2,7 @@
 
 use LaravelLegends\EloquentFilter\Exceptions\RestrictionException;
 use LaravelLegends\EloquentFilter\Filter;
+use phpDocumentor\Reflection\DocBlock\Tags\Var_;
 
 class FilterTest extends Orchestra\Testbench\TestCase
 {
@@ -28,7 +29,6 @@ class FilterTest extends Orchestra\Testbench\TestCase
 
     public function testApplyMax()
     {
-        
         request()->replace([
             'max' => ['age' => '18']
         ]);
@@ -38,7 +38,6 @@ class FilterTest extends Orchestra\Testbench\TestCase
         $this->assertTrue($query->toSql() === 'select * from "users" where ("age" <= ?)');
 
         $this->assertContains('18', $query->getBindings());
-        
     }
 
     public function testApplyMin()
@@ -82,7 +81,7 @@ class FilterTest extends Orchestra\Testbench\TestCase
         $filter->apply($user_query = User::query(), request());
 
         $this->assertEquals(
-            $user_query->toSql(), 
+            $user_query->toSql(),
             'select * from "users" where (exists (select * from "user_phones" where "users"."id" = "user_phones"."user_id" and "number" = ?))'
         );
 
@@ -281,18 +280,14 @@ class FilterTest extends Orchestra\Testbench\TestCase
         $this->assertEquals($query->toSql(), $expected_sql);
 
         // $this->assertContains('2022-12-31', $query->getBindings());
-    
     }
 
     public function testSetRuleCatchException()
     {
         $filter = new Filter();
-        try  {
-
+        try {
             $filter->setRule('rule', 'invalid_value');
-
         } catch (\Exception $e) {
-
             $this->assertTrue($e instanceof \UnexpectedValueException);
         }
     }
@@ -300,7 +295,6 @@ class FilterTest extends Orchestra\Testbench\TestCase
 
     public function testDateMax()
     {
-
         request()->replace([
             'date_max' => ['posted_at' => '2025-12-30']
         ]);
@@ -316,13 +310,10 @@ class FilterTest extends Orchestra\Testbench\TestCase
         $this->assertEquals($query->toSql(), $expected_sql);
 
         $this->assertContains('2025-12-30', $query->getBindings());
-    
     }
 
     public function testDateMin()
     {
-
-        
         request()->replace([
             'date_min' => ['posted_at' => '1998-10-10']
         ]);
@@ -337,12 +328,10 @@ class FilterTest extends Orchestra\Testbench\TestCase
         $this->assertEquals($query->toSql(), $expected_sql);
 
         $this->assertContains('1998-10-10', $query->getBindings());
-    
     }
 
     public function testNotEqual()
     {
-
         request()->replace([
             'not_equal' => ['profile_id' => '3']
         ]);
@@ -356,7 +345,6 @@ class FilterTest extends Orchestra\Testbench\TestCase
 
     public function testWithoutNested()
     {
-
         request()->replace([
             'not_equal' => ['profile_id' => '7']
         ]);
@@ -380,7 +368,6 @@ class FilterTest extends Orchestra\Testbench\TestCase
         $query = User::filter();
 
         $this->assertEquals($query->toSql(), 'select * from "users" where ("name" LIKE ?)');
-
     }
 
 
@@ -403,7 +390,7 @@ class FilterTest extends Orchestra\Testbench\TestCase
 
         try {
             $query = User::filter();
-        } catch(RestrictionException $e) {
+        } catch (RestrictionException $e) {
             $this->assertEquals($e->getMessage(), 'Cannot use filter "name" field with rule "exact"');
         }
 
@@ -416,18 +403,17 @@ class FilterTest extends Orchestra\Testbench\TestCase
 
         try {
             $filter->apply(User::query(), request());
-        } catch(RestrictionException $e) {
+        } catch (RestrictionException $e) {
             $this->assertEquals($e->getMessage(), 'Cannot use filter "name" field with rule "max"');
         }
 
         $filter->unrestricted()->apply(User::query(), request());
-        // no exception    
+        // no exception
     }
 
 
     public function testRelationParse()
     {
-
         request()->replace([
             'exact'    => ['phones.country' => '55'],
             'contains' => ['phones.number' => '4321', 'phones.ddd' => '32']
@@ -442,5 +428,29 @@ class FilterTest extends Orchestra\Testbench\TestCase
         $this->assertContains('%4321%', $bindings = $query->getBindings());
         $this->assertContains('%32%', $bindings);
         $this->assertContains('55', $bindings);
+    }
+
+
+    public function testSetRequestCallback()
+    {
+        $filter = new Filter();
+
+        // the request /api/users?phones.country=exact:55&email=contains:31
+        $filter->setKeyCallback(function ($rule, $key, $value) {
+            $pos = strpos($value, $rule . ':');
+            if ($pos === 0) {
+                return [$key, substr($value, $pos)];
+            }
+        });
+        
+        request()->replace([
+            'phones.country'  => 'exact:55',
+            'email' => 'contains:31',
+        ]);
+
+
+        $filter->apply($query = User::query(), request());
+
+        echo $query->toSql();
     }
 }
