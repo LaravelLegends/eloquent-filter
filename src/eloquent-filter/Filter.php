@@ -131,7 +131,6 @@ class Filter
 
                 $key && $rules[$rule_key][$key] = $value;
             }
-            $key && $rules[$rule_key][$key] = $value;
         }
 
         return $rules;

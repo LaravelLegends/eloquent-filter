@@ -437,9 +437,10 @@ class FilterTest extends Orchestra\Testbench\TestCase
 
         // the request /api/users?phones.country=exact:55&email=contains:31
         $filter->setKeyCallback(function ($rule, $key, $value) {
-            $pos = strpos($value, $rule . ':');
+            $expr = $rule . ':';
+            $pos = strpos($value, $expr);
             if ($pos === 0) {
-                return [$key, substr($value, $pos)];
+                return [$key, substr($value, strlen($expr))];
             }
         });
         
@@ -451,6 +452,9 @@ class FilterTest extends Orchestra\Testbench\TestCase
 
         $filter->apply($query = User::query(), request());
 
-        echo $query->toSql();
+        $bindings = $query->getBindings();
+
+        $this->assertContains('55', $bindings);
+        $this->assertContains('%31%', $bindings);
     }
 }
