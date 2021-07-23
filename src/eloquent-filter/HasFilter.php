@@ -16,9 +16,9 @@ trait HasFilter
 
         $filter = $this->getEloquentFilter();
 
-        if (isset($this->filterRestrictions)) {
-            $filter->restrict($this->filterRestrictions);
-        }
+        $allowedFilters = $this->allowedFilters ?? $this->filterRestrictions ?? null;
+
+        $allowedFilters && $filter->allow($allowedFilters);
         
         $filter->apply($query, $request ?: app('request'))->unrestricted();
         

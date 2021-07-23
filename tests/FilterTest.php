@@ -371,7 +371,7 @@ class FilterTest extends Orchestra\Testbench\TestCase
     }
 
 
-    public function testRestriction()
+    public function testAllow()
     {
 
         // api/users?contains[name]=Wallace
@@ -399,7 +399,7 @@ class FilterTest extends Orchestra\Testbench\TestCase
             'max' => ['name' => 'Wallace'],
         ]);
 
-        $filter = (new Filter)->restrict(['name' => ['contains']]);
+        $filter = (new Filter)->allow(['name' => ['contains']]);
 
         try {
             $filter->apply(User::query(), request());
@@ -407,7 +407,7 @@ class FilterTest extends Orchestra\Testbench\TestCase
             $this->assertEquals($e->getMessage(), 'Cannot use filter "name" field with rule "max"');
         }
 
-        $filter->unrestricted()->apply(User::query(), request());
+        $filter->allowAll()->apply(User::query(), request());
         // no exception
     }
 

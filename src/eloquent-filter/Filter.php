@@ -43,7 +43,7 @@ class Filter
     /**
      * @var array
      */
-    protected $restrictions = [];
+    protected $allowedFilters = [];
 
 
     protected $key_callback = null;
@@ -80,16 +80,16 @@ class Filter
      */
     public function getCallback(Request $request)
     {
-        $rules = $this->getRulesFromRequest($request);
+        $preparedData = $this->getPreparedDataFromRequest($request);
 
-        [$base_rules, $related] = $this->getGroupedRules($rules);
+        [$baseFilters, $relatedFilters] = $this->getGroupedFiltersByRules($preparedData);
 
-        return function ($query) use ($base_rules, $related) {
-            foreach ($base_rules as $rule => $fields) {
+        return function ($query) use ($baseFilters, $relatedFilters) {
+            foreach ($baseFilters as $rule => $fields) {
                 $this->applyRule($query, $rule, $fields);
             }
 
-            foreach ($related as $relation => $rules) {
+            foreach ($relatedFilters as $relation => $rules) {
                 $query->whereHas($relation, function ($subquery) use ($rules) {
                     foreach ($rules as $rule => $fields) {
                         $this->applyRule($subquery, $rule, $fields);
@@ -103,19 +103,25 @@ class Filter
 
     /**
      * Extracts the parameters used in model filters from request
-     *
+     * @deprecated
      * @return array
      */
     public function getRulesFromRequest(Request $request)
     {
-        $rules = $this->prepareRequest($request);
-
-        $this->checkRestrictions($rules);
-        
-        return $rules;
+        return $this->getPreparedDataFromRequest($request);   
     }
 
-    protected function prepareRequest($request)
+    public function getPreparedDataFromRequest(Request $request)
+    {
+        $requestData = $this->prepareRequestData($request);
+
+        $this->checkAllowedFields($requestData);
+        
+        return $requestData;
+
+    }
+
+    protected function prepareRequestData(Request $request)
     {
         $rule_keys = array_keys($this->rules);
         
@@ -264,23 +270,23 @@ class Filter
      * @param array $rules
      * @return array
      */
-    protected function getGroupedRules(array $rules)
+    protected function getGroupedFiltersByRules(array $rules)
     {
-        $base = $related = [];
+        $commonFields = $relatedFields = [];
 
         foreach ($rules as $name => $fields) {
             if (! $fields) {
                 continue;
             }
 
-            [$base[$name], $related_fields] = $this->getGroupedFields($fields);
+            [$commonFields[$name], $related] = $this->getGroupedFields($fields);
 
-            foreach ($related_fields as $relation => $value) {
-                $related[$relation][$name] = $value;
+            foreach ($related as $relation => $value) {
+                $relatedFields[$relation][$name] = $value;
             }
         }
 
-        return [$base, $related];
+        return [$commonFields, $relatedFields];
     }
     
     /**
@@ -311,44 +317,42 @@ class Filter
 
     /**
      * Define a list of allowed field and rules
-     *
+     * 
+     * @deprecated Renamed to "allow"
      * @param array $restriction
      * @return self
      */
-    public function restrict(array $restrictions)
+    public function restrict(array $allowedFields)
     {
-        $this->restrictions = $restrictions;
-
-        return $this;
+        return $this->allow($allowedFields);
     }
 
     /**
-     * Remove restrictions
-     *
+     * Remove allowedFields
+     * 
+     * @deprecated 
      * @return self
      */
     public function unrestricted()
     {
-        $this->restrictions = [];
-
-        return $this;
+        return $this->allowAll();
     }
 
     /**
-     * Check if filter contains restrictions
+     * Check if filter contains allowedFields
      *
      * @throws \LaravelLegends\EloquentFilter\Exceptions\RestrictionException
      * @return void
     */
-    protected function checkRestrictions(array $rules)
+    protected function checkAllowedFields(array $payloadFields)
     {
-        if (empty($this->restrictions)) {
+        if (empty($this->allowedFields)) {
             return;
         }
 
-        foreach ($rules as $rule => $fields) {
+        foreach ($payloadFields as $rule => $fields) {
             foreach (array_keys($fields) as $field) {
-                $this->checkFieldRestriction($rule, $field);
+                $this->checkAllowedFieldByRule($field, $rule);
             }
         }
     }
@@ -360,15 +364,29 @@ class Filter
      * @throws \LaravelLegends\EloquentFilter\Exceptions\RestrictionException
      * @return void
      */
-    protected function checkFieldRestriction($rule, $field)
+    protected function checkAllowedFieldByRule($field, $rule)
     {
-        if (!isset($this->restrictions[$field])) {
+        if (!isset($this->allowedFields[$field])) {
             throw new RestrictionException(sprintf('Cannot use filter with "%s" field', $field));
-        } elseif (in_array($this->restrictions[$field], ['*', true], true) || in_array($rule, (array) $this->restrictions[$field])) {
+        } elseif (in_array($this->allowedFields[$field], ['*', true], true) || in_array($rule, (array) $this->allowedFields[$field])) {
             return;
         }
 
         throw new RestrictionException(sprintf('Cannot use filter "%s" field with rule "%s"', $field, $rule));
+    }
+
+    public function allow(array $allowedFilters)
+    {
+        $this->allowedFilters = $allowedFilters;
+
+        return $this;
+    }
+
+    public function allowAll()
+    {
+        $this->allowedFilters = [];
+
+        return $this;
     }
 
     /**
@@ -376,10 +394,10 @@ class Filter
      *
      * @param string Model class
      * @param \Illuminate\Http\Request $request
-     * @param array|null $restriction
+     * @param array|null $allowedFilters
      * @return \Illuminate\Database\Eloquent\Builder
      */
-    public static function fromModel($model, Request $request, array $restrictions = [])
+    public static function fromModel($model, Request $request, array $allowedFilters = [])
     {
         if (! is_subclass_of($model, \Illuminate\Database\Eloquent\Model::class)) {
             throw new \InvalidArgumentException('Only models can be passed by parameter');
@@ -387,7 +405,7 @@ class Filter
 
         $filter = new static;
 
-        $restrictions && $filter->restrict($restrictions);
+        $allowedFilters && $filter->allow($allowedFilters);
         
         $filter->apply($query = $model::query(), $request);
 
