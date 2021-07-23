@@ -82,7 +82,7 @@ class Filter
     {
         $rules = $this->getRulesFromRequest($request);
 
-        list($base_rules, $related) = $this->getGroupedRules($rules);
+        [$base_rules, $related] = $this->getGroupedRules($rules);
 
         return function ($query) use ($base_rules, $related) {
             foreach ($base_rules as $rule => $fields) {
@@ -273,7 +273,7 @@ class Filter
                 continue;
             }
 
-            list($base[$name], $related_fields) = $this->getGroupedFields($fields);
+            [$base[$name], $related_fields] = $this->getGroupedFields($fields);
 
             foreach ($related_fields as $relation => $value) {
                 $related[$relation][$name] = $value;
@@ -295,7 +295,7 @@ class Filter
 
         foreach ($fields as $field => $value) {
             if ($this->containsRelation($field)) {
-                list($field, $relation) = $this->parseRelation($field);
+                [$field, $relation] = $this->parseRelation($field);
                 
                 $related[$relation][$field] = $value;
 
