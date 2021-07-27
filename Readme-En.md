@@ -27,7 +27,7 @@ Model:
 use LaravelLegends\EloquentFilter\HasFilter;
 
 class User extends Model
-{A useful library to make standards in filters in Eloquent.
+{
     use HasFilter;
 }
 ```
@@ -97,7 +97,7 @@ class UsersController extends Controller
 Note que, no segundo exemplo, precisamos passar uma instância de `Request`. Isso é muito útil em casos onde você queria utilizar as requests criadas por `make:request`.
 
 
-## Como funciona?
+## What does it do?
 Ao utilizar um dos exemplos acima, você pode fazer a seguinte chamada: `api/users?contains[name]=search+term`
 Ao fazer isso, o `Filter` esperará a passagem de parâmetros específicos para realizar filtros padrão na sua consulta.
 
