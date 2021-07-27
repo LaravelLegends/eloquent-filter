@@ -1,7 +1,6 @@
 # Eloquent Filter
 
-Uma simples biblioteca para facilitar a utilização de filtros no Eloquent. É muito útil para padronizar consultas em chamadas de API.
-
+A useful library to make standards in filters in Eloquent.
 
 ## Descrição
 
