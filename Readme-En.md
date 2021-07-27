@@ -12,7 +12,7 @@ Run the follow command
 
 ```composer require laravellegends/eloquent-filter```
 
-## Exemplos de uso:
+## Usage examples:
 
 Existem duas maneiras de utilizar a biblioteca Eloquent Filter. 
 
@@ -21,7 +21,7 @@ Existem duas maneiras de utilizar a biblioteca Eloquent Filter.
 O trait `LaravelLegends\EloquentFilter\HasFilter` pode ser utilizado no model onde você deseja aplicar os filtros. Ao adicionar o `trait`, o método `filter` estará disponível.
  
 
-#### Exemplo
+#### Example
 Model:
 ```php
 use LaravelLegends\EloquentFilter\HasFilter;
@@ -61,7 +61,7 @@ class UsersController extends Controller {
 }
 ```
 
-### Utilizando a classe `Filter`
+### Using the `Filter` class
 
 Você também pode utilizar a classe `Filter` diretamente para aplicar em suas consultas com eloquent.
 
