@@ -223,7 +223,7 @@ Veja:
 
 ```api/users?exact[phones.number]=55```
 
-## Exemplos com Axios
+## Axios examples
 
 Para quem utiliza `axios` para consumir uma API construida no Laravel, pode-se perfeitamente utilizar a opção `params` para incluir as buscas mostradas acima.
 
