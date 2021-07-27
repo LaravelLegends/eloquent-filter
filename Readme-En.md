@@ -1,6 +1,6 @@
 # Eloquent Filter
-
 A useful library to make standards in filters in Eloquent.
+A very useful library for creating and standardizing search filters in Laravel Eloquent.
 
 ## Descrição
 
@@ -27,7 +27,7 @@ Model:
 use LaravelLegends\EloquentFilter\HasFilter;
 
 class User extends Model
-{
+{A useful library to make standards in filters in Eloquent.
     use HasFilter;
 }
 ```
