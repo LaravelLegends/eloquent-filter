@@ -2,13 +2,13 @@
 A useful library to make standards in filters in Eloquent.
 A very useful library for creating and standardizing search filters in Laravel Eloquent.
 
-## Descrição
+## Description
 
 This library is helpful to create standard to search filters for Laravel. The idea is aggregate many filters simply passing the values in your requests. Furthermore, this library helps you to avoid write or rewrite many lines of code for create search on your requests.
 
-## Instalação
+## Instalation
 
-Rode o comando 
+Run the follow command 
 
 ```composer require laravellegends/eloquent-filter```
 
