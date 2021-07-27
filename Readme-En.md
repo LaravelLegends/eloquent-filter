@@ -16,7 +16,7 @@ Run the follow command
 
 Existem duas maneiras de utilizar a biblioteca Eloquent Filter. 
 
-### Utilizando o trait `HasFilter`
+### Using the `HasFilter` trait
 
 O trait `LaravelLegends\EloquentFilter\HasFilter` pode ser utilizado no model onde você deseja aplicar os filtros. Ao adicionar o `trait`, o método `filter` estará disponível.
  
@@ -65,7 +65,7 @@ class UsersController extends Controller {
 
 Você também pode utilizar a classe `Filter` diretamente para aplicar em suas consultas com eloquent.
 
-Veja:
+See:
 
 ```php
 use App\Models\User;
@@ -198,7 +198,7 @@ Exemplo:
 A url `api/users?not_equal[profile_id]=3` é equivalente a `User::where('profile_id', '<>', '3')`
 
 
-## Filtrando campos de relacionamentos
+## Filtering relationship fields
 
 É possível aplicar os filtros de pesquisa desta biblioteca nos relacionamentos definidos no seu Model.
 
