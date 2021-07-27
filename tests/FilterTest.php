@@ -431,12 +431,12 @@ class FilterTest extends Orchestra\Testbench\TestCase
     }
 
 
-    public function testSetRequestCallback()
+    public function testSetDataCallback()
     {
         $filter = new Filter();
 
         // the request /api/users?phones.country=exact:55&email=contains:31
-        $filter->setKeyCallback(function ($rule, $key, $value) {
+        $filter->setDataCallback(function ($rule, $key, $value) {
             $expr = $rule . ':';
             $pos = strpos($value, $expr);
             if ($pos === 0) {

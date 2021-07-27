@@ -38,7 +38,7 @@ class Filter
     /**
      * @var string
      */
-    protected $relation_separator = '.';
+    protected $relationSeparator = '.';
 
     /**
      * @var array
@@ -46,7 +46,10 @@ class Filter
     protected $allowedFilters = [];
 
 
-    protected $key_callback = null;
+    /**
+     * @var \Closure|null
+     */
+    protected $dataCallback = null;
 
     /**
      * Apply the filter based on request
@@ -78,7 +81,7 @@ class Filter
      * @param Request $request
      * @return \Closure
      */
-    public function getCallback(Request $request)
+    public function getCallback(Request $request): \Closure
     {
         $preparedData = $this->getPreparedDataFromRequest($request);
 
@@ -111,7 +114,12 @@ class Filter
         return $this->getPreparedDataFromRequest($request);   
     }
 
-    public function getPreparedDataFromRequest(Request $request)
+    /**
+     * Gets the data from the request to be used in Filters
+     * @param Request $request
+     * @return array
+     */
+    public function getPreparedDataFromRequest(Request $request): array
     {
         $requestData = $this->prepareRequestData($request);
 
@@ -121,19 +129,27 @@ class Filter
 
     }
 
-    protected function prepareRequestData(Request $request)
+    /**
+     * Prepares the request data use in filters
+     * 
+     * @param Request $request
+     * @return array
+     */
+    protected function prepareRequestData(Request $request): array
     {
         $rule_keys = array_keys($this->rules);
         
-        if (null === $this->key_callback) {
+        if (null === $this->dataCallback) {
             return array_filter($request->only($rule_keys));
         }
 
         $rules = [];
         
         foreach ($rule_keys as $rule_key) {
+
             foreach ($request->all() as $key => $value) {
-                [$key, $value] = ($this->key_callback)($rule_key, $key, $value);
+
+                [$key, $value] = ($this->dataCallback)($rule_key, $key, $value);
 
                 $key && $rules[$rule_key][$key] = $value;
             }
@@ -142,9 +158,9 @@ class Filter
         return $rules;
     }
 
-    public function setKeyCallback(callable $callback)
+    public function setDataCallback(callable $callback)
     {
-        $this->key_callback = $callback;
+        $this->dataCallback = $callback;
 
         return $this;
     }
@@ -163,6 +179,7 @@ class Filter
         $rule = $this->getRuleAsCallable($name);
 
         foreach ($fields as $field => $value) {
+
             if ($this->isEmpty($value)) {
                 continue;
             }
@@ -192,7 +209,7 @@ class Filter
      * @return boolean
      */
 
-    public function hasRule($name)
+    public function hasRule($name): bool
     {
         return isset($this->rules[$name]);
     }
@@ -222,7 +239,7 @@ class Filter
      *
      * @return callable
      */
-    public function getRuleAsCallable($name)
+    public function getRuleAsCallable($name): callable
     {
         $rule = $this->getRule($name);
 
@@ -234,7 +251,7 @@ class Filter
      *
      * @return boolean
      */
-    protected function isEmpty($value)
+    protected function isEmpty($value): bool
     {
         return $value === '' || $value === [];
     }
@@ -245,11 +262,11 @@ class Filter
      * @param string $field
      * @return array
      */
-    protected function parseRelation($field)
+    protected function parseRelation($field): array
     {
-        $parts = explode($this->relation_separator, $field);
+        $parts = explode($this->relationSeparator, $field);
 
-        return [array_pop($parts), implode($this->relation_separator, $parts)];
+        return [array_pop($parts), implode($this->relationSeparator, $parts)];
     }
 
     /**
@@ -257,9 +274,9 @@ class Filter
      *
      * @return boolean
      */
-    protected function containsRelation($field)
+    protected function containsRelation($field): bool
     {
-        $index = strpos($field, $this->relation_separator);
+        $index = strpos($field, $this->relationSeparator);
 
         return $index > 0;
     }
@@ -270,7 +287,7 @@ class Filter
      * @param array $rules
      * @return array
      */
-    protected function getGroupedFiltersByRules(array $rules)
+    protected function getGroupedFiltersByRules(array $rules): array
     {
         $commonFields = $relatedFields = [];
 
@@ -300,6 +317,7 @@ class Filter
         $related = $base = [];
 
         foreach ($fields as $field => $value) {
+
             if ($this->containsRelation($field)) {
                 [$field, $relation] = $this->parseRelation($field);
                 
@@ -318,7 +336,7 @@ class Filter
     /**
      * Define a list of allowed field and rules
      * 
-     * @deprecated Renamed to "allow"
+     * @deprecated use "allow" instead of
      * @param array $restriction
      * @return self
      */
@@ -330,7 +348,7 @@ class Filter
     /**
      * Remove allowedFields
      * 
-     * @deprecated 
+     * @deprecated use "allowAll" instead of
      * @return self
      */
     public function unrestricted()
@@ -341,16 +359,17 @@ class Filter
     /**
      * Check if filter contains allowedFields
      *
+     * @param array $filterData
      * @throws \LaravelLegends\EloquentFilter\Exceptions\RestrictionException
      * @return void
     */
-    protected function checkAllowedFields(array $payloadFields)
+    protected function checkAllowedFields(array $filterData): void
     {
         if (empty($this->allowedFields)) {
             return;
         }
 
-        foreach ($payloadFields as $rule => $fields) {
+        foreach ($filterData as $rule => $fields) {
             foreach (array_keys($fields) as $field) {
                 $this->checkAllowedFieldByRule($field, $rule);
             }
@@ -364,7 +383,7 @@ class Filter
      * @throws \LaravelLegends\EloquentFilter\Exceptions\RestrictionException
      * @return void
      */
-    protected function checkAllowedFieldByRule($field, $rule)
+    protected function checkAllowedFieldByRule(string $field, string $rule)
     {
         if (!isset($this->allowedFields[$field])) {
             throw new RestrictionException(sprintf('Cannot use filter with "%s" field', $field));
@@ -375,6 +394,12 @@ class Filter
         throw new RestrictionException(sprintf('Cannot use filter "%s" field with rule "%s"', $field, $rule));
     }
 
+    /**
+     * Set rules (values) allowed by fields (keys)
+     * 
+     * @param array $allowedFields
+     * @return self
+     */
     public function allow(array $allowedFilters)
     {
         $this->allowedFilters = $allowedFilters;
@@ -382,6 +407,10 @@ class Filter
         return $this;
     }
 
+    /**
+     * Remove filter restrictions
+     * 
+     */
     public function allowAll()
     {
         $this->allowedFilters = [];
