@@ -365,7 +365,7 @@ class Filter
     */
     protected function checkAllowedFields(array $filterData): void
     {
-        if (empty($this->allowedFields)) {
+        if (empty($this->allowedFilters)) {
             return;
         }
 
@@ -385,9 +385,9 @@ class Filter
      */
     protected function checkAllowedFieldByRule(string $field, string $rule)
     {
-        if (!isset($this->allowedFields[$field])) {
+        if (!isset($this->allowedFilters[$field])) {
             throw new RestrictionException(sprintf('Cannot use filter with "%s" field', $field));
-        } elseif (in_array($this->allowedFields[$field], ['*', true], true) || in_array($rule, (array) $this->allowedFields[$field])) {
+        } elseif (in_array($this->allowedFilters[$field], ['*', true], true) || in_array($rule, (array) $this->allowedFilters[$field])) {
             return;
         }
 
