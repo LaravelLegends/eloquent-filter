@@ -321,6 +321,11 @@ class FilterTest extends Orchestra\Testbench\TestCase
         (new Filter)->apply($query = User::query(), request());
 
         $expected_sql = 'select * from "users" where (strftime(\'%Y-%m-%d\', "posted_at") >= ?)';
+
+        User::where(function ($query) {
+            $query->whereDate('posted_at', '=', '1998-10-10');
+        })->toSql();
+
         if (app()->version() >= 6) {
             $expected_sql = 'select * from "users" where (strftime(\'%Y-%m-%d\', "posted_at") >= cast(? as text))';
         }
@@ -330,17 +335,79 @@ class FilterTest extends Orchestra\Testbench\TestCase
         $this->assertContains('1998-10-10', $query->getBindings());
     }
 
-    public function testNotEqual()
+    public function testDateExact()
     {
         request()->replace([
-            'not_equal' => ['profile_id' => '3']
+            'date_exact' => ['updated_at' => '2021-01-01']
         ]);
 
         (new Filter)->apply($query = User::query(), request());
 
-        $this->assertEquals($query->toSql(), 'select * from "users" where ("profile_id" <> ?)');
+        $expected = User::query()->where(function ($query) {
+            $query->whereDate('updated_at', '=', '2021-01-01');
+        })->toSql();
+
+        $this->assertEquals($expected, $query->toSql());
+    }
+
+    public function testNotEqual()
+    {
+        request()->replace(['not_equal' => ['profile_id' => '3']]);
+
+        (new Filter)->apply($query = User::query(), request());
+
+        $expected = User::where(function ($q) {
+            $q->where('profile_id', '<>', '3');
+        })->toSql();
+
+        $this->assertEquals($expected, $query->toSql());
 
         $this->assertContains('3', $query->getBindings());
+    }
+
+    public function testMaxYear()
+    {
+        request()->replace([
+            'year_max' => ['created_at' => '2021']
+        ]);
+
+        (new Filter)->apply($query = User::query(), request());
+
+        $expected = User::query()->where(function ($query) {
+            $query->whereYear('created_at', '<=', '2021');
+        })->toSql();
+
+        $this->assertEquals($expected, $query->toSql());
+    }
+
+    public function testMinYear()
+    {
+        request()->replace([
+            'year_min' => ['created_at' => '2021']
+        ]);
+
+        (new Filter)->apply($query = User::query(), request());
+
+        $expected = User::query()->where(function ($query) {
+            $query->whereYear('created_at', '=>', '2021');
+        })->toSql();
+
+        $this->assertEquals($expected, $query->toSql());
+    }
+
+    public function testExactYear()
+    {
+        request()->replace([
+            'year_exact' => ['created_at' => '2021']
+        ]);
+
+        (new Filter)->apply($query = User::query(), request());
+
+        $expected = User::query()->where(function ($query) {
+            $query->whereYear('created_at', '=', '2021');
+        })->toSql();
+
+        $this->assertEquals($expected, $query->toSql());
     }
 
     public function testWithoutNested()

@@ -32,7 +32,11 @@ class Filter
         'not_in'      => Rules\NotIn::class,
         'date_max'    => Rules\DateMax::class,
         'date_min'    => Rules\DateMin::class,
+        'date_exact'  => Rules\DateExact::class,
         'not_equal'   => Rules\NotEqual::class,
+        'year_exact'  => Rules\YearExact::class,
+        'year_min'    => Rules\YearMin::class,
+        'year_max'    => Rules\YearMax::class,
     ];
 
     /**
