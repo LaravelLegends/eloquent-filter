@@ -196,6 +196,12 @@ Example:
 
 A url `api/users?not_equal[profile_id]=3` é equivalente a `User::where('profile_id', '<>', '3')`
 
+## `year_max`
+
+## `year_min`
+
+## `year_exact`
+
 
 ## Filtering relationship fields
 
