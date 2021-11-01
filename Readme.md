@@ -1,28 +1,31 @@
 # Eloquent Filter
 
-Uma simples biblioteca para facilitar a utilização de filtros no Eloquent. É muito útil para padronizar consultas em chamadas de API.
+A useful library to make standards in filters in Eloquent.
+A very useful library for creating and standardizing search filters in Laravel Eloquent.
+
+🇧🇷🚀🚀🚀
 
 
-## Descrição
+## Description
 
-Essa biblioteca tem como finalidade facilitar e padronizar a utilização de filtros de pesquisa para o Laravel. A ideia é agregar vários filtros simplesmente passando os valores na sua requisição. Além do mais, essa biblioteca ajuda a evitar que você escrevar (ou reescreva) várias linhas de código para tratar filtros de pesquisa apliacados à sua consulta.
+This library is helpful to create standard to search filters for Laravel. The idea is aggregate many filters simply passing the values in your requests. Furthermore, this library helps you to avoid write or rewrite many lines of code for create search on your requests.
 
-## Instalação
+## Instalation
 
-Rode o comando 
+Run the follow command 
 
 ```composer require laravellegends/eloquent-filter```
 
-## Exemplos de uso:
+## Usage examples:
 
-Existem duas maneiras de utilizar a biblioteca Eloquent Filter. 
+You can use the Eloquent Filter with two ways:
 
-### Utilizando o trait `HasFilter`
+### Using the `HasFilter` trait
 
-O trait `LaravelLegends\EloquentFilter\HasFilter` pode ser utilizado no model onde você deseja aplicar os filtros. Ao adicionar o `trait`, o método `filter` estará disponível.
+The `LaravelLegends\EloquentFilter\HasFilter` trait can be used in models that will be apply the search filters. 
+This trait provides the `filter` method for model.
  
-
-#### Exemplo
+#### Example
 Model:
 ```php
 use LaravelLegends\EloquentFilter\HasFilter;
@@ -46,14 +49,14 @@ class UsersController extends Controller {
         return User::filter()->paginate();
     }
 
-    // ou
+    // or
 
     public function index()
     {
         return User::latest('id')->filter()->paginate();
     }
 
-    // ou
+    // or
 
     public function index(Request $request)
     {
@@ -62,11 +65,11 @@ class UsersController extends Controller {
 }
 ```
 
-### Utilizando a classe `Filter`
+### Using the `Filter` class
 
-Você também pode utilizar a classe `Filter` diretamente para aplicar em suas consultas com eloquent.
+Yo can also use the `Filter` directly.
 
-Veja:
+See:
 
 ```php
 use App\Models\User;
@@ -82,7 +85,7 @@ class UsersController extends Controller
         return $query->paginate();
     }
 
-    // ou
+    // or
 
     public function index(Request $request)
     {
@@ -94,98 +97,93 @@ class UsersController extends Controller
     }
 }
 ```
+Note that in second example, is required to pass a `Request` instance as argument. It is a very useful in cases where you need to use a custom `Request` instance (made by `artisan make:request` command).
 
-Note que, no segundo exemplo, precisamos passar uma instância de `Request`. Isso é muito útil em casos onde você queria utilizar as requests criadas por `make:request`.
+## What does it do?
 
+This library internally apply filters based on query string parameters with special keyworks names.
 
-## Como funciona?
-Ao utilizar um dos exemplos acima, você pode fazer a seguinte chamada: `api/users?contains[name]=search+term`
-Ao fazer isso, o `Filter` esperará a passagem de parâmetros específicos para realizar filtros padrão na sua consulta.
-
-Por exemplo, `contains` representa a regra de filtro utilizado internamente. `name` trata-se do campo onde o filtro será aplicado. `search+term` trata-se o valor desse campo.
-
-Veja a relação de parâmetros que podem ser utilizados na consulta:
 
 ## `max`
 
-o valor máximo da coluna. A url `api/users?max[field]=100` equivalente a `User::where('field', '<=', 100)`.
+The maximum value of a column. The url `api/users?max[field]=100` is like a `User::where('field', '<=', 100)`.
 
 ## `min`
-O valor mínimo da coluna. A url `api/users?min[age]=33` equivalente a `User::where('age', '>=', 33)`.
+The minimum value of a column. The url `api/users?min[age]=33` is like a `User::where('age', '>=', 33)`.
 
 ## `contains`
-Um termo contindo numa coluna.
-A url `api/users?contains[name]=wallace` é equivalente a `User::where('name', 'LIKE', '%wallace%')`.
+A search term contained in a column.
+The url `api/users?contains[name]=wallace` is like a `User::where('name', 'LIKE', '%wallace%')`.
 
 ## `ends_with`
-Filtra a coluna contendo determinado valor no final. Utiliza internamente um `LIKE` com o valor `%$value`.
+Search a value according to end content of string. Sounds like a `LIKE` with `%$value` value.
 
 ## `starts_with`
 
-Filtra a coluna contendo determinado valor no início. 
+Filter the field when the value starts with a certain value.
 
-A url `api/users?starts_with[name]=brcontainer` é equivalente a  `User::where('name', 'LIKE', 'brcontainer%')`.
+A url `api/users?starts_with[name]=brcontainer` Sounds like a  `User::where('name', 'LIKE', 'brcontainer%')`.
 
 ## `exact`
-Filtra a coluna por um valor exato.
+Search by a exact value of the field·
 
-A url `api/users?exact[email]=teste@teste.com` é equivalente a  `User::where('name', '=', 'teste@teste.com')`.
+A url `api/users?exact[email]=teste@teste.com` Sounds like a  `User::where('name', '=', 'teste@teste.com')`.
 
 ## `has`
 
-Filtra através de um relacionamento. Você pode usar o valor `0` ou `1`.
+Filter by relationship. You can use the `0` or `1` value.
 
-Exemplo:
+Example:
 
-A url `api/users?has[posts]=1` é equivalente à `User::has('posts')`
+The url `api/users?has[posts]=1` is like a `User::has('posts')`
 
-A url `api/users?has[posts]=0` é equivalente à `User::doesntHave('posts')`
+The url `api/users?has[posts]=0` is like a `User::doesntHave('posts')`
 
 
 
 ## `is_null`
 
-Filtra se o valor for `null` ou não. Use `1` para quando for `null`, e `0` para quando não for.
+Apply `WHERE IS NULL` or `WHERE IS NOT NULL` to a query.
 
-Exemplo:
+Example:
 
-A url `api/users?is_null[cpf]=1` é equivalente à `User::whereNull('cpf')`
+The url `api/users?is_null[cpf]=1` is like a `User::whereNull('cpf')`
 
-A url `api/users?is_null[age]=0` é equivalente à `User::whereNotNull('age')`
+The url `api/users?is_null[age]=0` is like a `User::whereNotNull('age')`
 
 
 
 ## `not_in`
 
-Filtra quando multiplos valores não estão presente numa coluna. 
+Searchs when a column NOT HAS the passed values.
 
-Exemplo:
+Example:
 
 A url `api/users?not_in[role][]=1&not_in[role][]=2` é equivalente à `User::whereNotIn('role', [1, 2])`
 
-**Observação**: Quando o `not_in[my_field]` for equivalente a um array vazio, nada será executado.
+**Observação**: When the `not_in[my_field]` is a empty array, no action will be taken.
 
 
 ## `in`
 
-Filtra quando multiplos valores estão presentes numa coluna. 
+Searchs when a column HAS the passed values.
 
-Exemplo:
+Example:
 
-A url `api/users?in[role][]=10&in[role][]=20` é equivalente à `User::whereIn('role', [10, 20])`
+The url `api/users?in[role][]=10&in[role][]=20` sounds like a `User::whereIn('role', [10, 20])`
 
-**Observação**: Quando o `in[my_field]` for equivalente a um array vazio, nada será executado.
+**NOTE**: When the `in[my_field]` is a empty array, no action will be taken.
 
 ## `date_max`
-Filtrar uma data através de um valor máximo.
+Search by a maximium value of a date field.
 
 A url `api/users?date_max[created_at]=2021-01-01` é equivalente a `User::whereDate('created_at', '<=', '2021-01-01')`
 
 ## `date_min`
 
-Filtra um campo de data através de um valor mínimo.
+Search by a minimun value of a date field.
 
-Exemplo:
+Example:
 
 A url `api/users?date_min[created_at]=2021-01-01` é equivalente a `User::whereDate('created_at', '>=', '2021-01-01')`
 
@@ -194,16 +192,16 @@ A url `api/users?date_min[created_at]=2021-01-01` é equivalente a `User::whereD
 
 Aplica um filtro utilizando o operador "não igual".
 
-Exemplo:
+Example:
 
 A url `api/users?not_equal[profile_id]=3` é equivalente a `User::where('profile_id', '<>', '3')`
 
 
-## Filtrando campos de relacionamentos
+## Filtering relationship fields
 
-É possível aplicar os filtros de pesquisa desta biblioteca nos relacionamentos definidos no seu Model.
+You can apply the search filters in the relatioship methods defined in your model.
 
-Por exemplo:
+For example:
 
 ```php
 class User
@@ -218,17 +216,15 @@ class User
 
 ```
 
-Você poderia buscar os usuários que possua um telefone com código do país como 55. É necessário apenas chamar o método relacionado ao model mais o campo, separado por ponto.
-
-Veja:
+In the following example, the user will be filtered for the related phone containing the value `55`.
 
 ```api/users?exact[phones.number]=55```
 
-## Exemplos com Axios
+## Axios examples
 
-Para quem utiliza `axios` para consumir uma API construida no Laravel, pode-se perfeitamente utilizar a opção `params` para incluir as buscas mostradas acima.
+If you use `axios` library, you can use the `params` options to include the above filters.
 
-Exemplo:
+Example:
 
 ```javascript
 const api = axios.create({
@@ -245,25 +241,22 @@ api.get('users', {
 ```
 
 
-## Restrição de campos
+## Fields restriction
 
-É possível configurar o filtro para ele aceitar apenas determinados campos. Isso permite especificar melhor os campos que podem ser filtrados.
-Você só precisa passar um `array` contedo as seguintes especificações:
+You can configure the filters for specific fields. You need only to pass an `array` with the follow rules:
 
 ```php
 [
-    'name' => 'contains' // só aceita "contains" para o campo "name",
-    'created_at' => ['date_min', 'date_max'] // aceita os dois filtros para o campo "created_at",
-    'phones.number' => true, // Aceita qualquer filtro para o campo "number" do relacionamento "phones()"
-    'profile_id'  => '*' // Aceita qualquer filtro para o campo profile_id
+    'name' => 'contains' // Only "contains" for "name" field,
+    'created_at' => ['date_min', 'date_max'] // Allow only two specified filters for the "created_at" field,
+    'phones.number' => true, // Accepts all filter rules for "number" field of "phones()" relationship
+    'profile_id'  => '*' // Accepts all filter rules  for "profile_id" field
 ]
 ```
 
-Você pode fazer isso de duas formas. 
+### Restricting fields that will be filtered in the model
 
-### Restrição de campos filtrados no Model
-
-No model, você apenas precisar definir a propriedade `$filterRestrictions` com as restrições necessárias
+To apply restrictions on certain filter that will be filtered, you can set the `$allowedFilters` property with the follow rules:
 
 ```php
 use LaravelLegends\EloquentFilter\HasFilter;
@@ -272,7 +265,7 @@ class User extends Model
 {
     use HasFilter;
 
-    protected $filterRestrictions = [
+    protected $allowedFilters = [
         'name'         => 'contains',
         'phone.number' => 'contains',
         'price'        => ['max', 'min'],
@@ -282,26 +275,26 @@ class User extends Model
 ```
 
 
-### Usando o método restrict
+### Using the allow method
 
 ```php
-$restriction = [
+$alloweds = [
     'name' => 'contains'
 ];
 
 $query = User::query();
 
-(new Filter)->restrict($restriction)->apply($query, $request)
+(new Filter)->allow($alloweds)->apply($query, $request)
 ```
 
-### Usando Filter::fromModel
+### Using the Filter::fromModel
 
 ```php
-$restriction = [
+$allowed = [
     'name' => 'contains'
 ];
 
-$query = Filter::fromModel(User::class, $request, $restriction);
+$query = Filter::fromModel(User::class, $request, $allowed);
 
 return $query->paginate();
 ```
