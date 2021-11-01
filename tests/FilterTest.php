@@ -29,13 +29,15 @@ class FilterTest extends Orchestra\Testbench\TestCase
 
     public function testApplyMax()
     {
-        request()->replace([
-            'max' => ['age' => '18']
-        ]);
+        request()->replace(['max' => ['age' => '18']]);
 
         (new Filter)->apply($query = User::query(), request());
 
-        $this->assertTrue($query->toSql() === 'select * from "users" where ("age" <= ?)');
+        $expected = User::where(function ($query) {
+            $query->where('age', '<=', '18');
+        })->toSql();
+
+        $this->assertEquals($expected, $query->toSql());
 
         $this->assertContains('18', $query->getBindings());
     }
@@ -61,7 +63,11 @@ class FilterTest extends Orchestra\Testbench\TestCase
 
         (new Filter)->apply($query = User::query(), request());
 
-        $this->assertTrue($query->toSql() === 'select * from "users" where ("name" = ? and "active" = ?)');
+        $expected = User::where(function ($query) {
+            $query->where('name', '=', 'wallace')->where('active', '=', 1);
+        })->toSql();
+
+        $this->assertEquals($expected, $query->toSql());
 
         $bindings = $query->getBindings();
 
@@ -301,11 +307,9 @@ class FilterTest extends Orchestra\Testbench\TestCase
 
         (new Filter)->apply($query = User::query(), request());
 
-        $expected_sql = 'select * from "users" where (strftime(\'%Y-%m-%d\', "posted_at") <= ?)';
-
-        if (app()->version() >= 6) {
-            $expected_sql = 'select * from "users" where (strftime(\'%Y-%m-%d\', "posted_at") <= cast(? as text))';
-        }
+        $expected_sql = User::where(function ($query) {
+            $query->whereDate('posted_at', '<=', '2025-12-30');
+        })->toSql();
 
         $this->assertEquals($query->toSql(), $expected_sql);
 
@@ -320,16 +324,10 @@ class FilterTest extends Orchestra\Testbench\TestCase
 
         (new Filter)->apply($query = User::query(), request());
 
-        $expected_sql = 'select * from "users" where (strftime(\'%Y-%m-%d\', "posted_at") >= ?)';
-
-        User::where(function ($query) {
-            $query->whereDate('posted_at', '=', '1998-10-10');
+        $expected_sql = User::where(function ($query) {
+            $query->whereDate('posted_at', '>=', '1998-10-10');
         })->toSql();
 
-        if (app()->version() >= 6) {
-            $expected_sql = 'select * from "users" where (strftime(\'%Y-%m-%d\', "posted_at") >= cast(? as text))';
-        }
-    
         $this->assertEquals($query->toSql(), $expected_sql);
 
         $this->assertContains('1998-10-10', $query->getBindings());
@@ -449,7 +447,6 @@ class FilterTest extends Orchestra\Testbench\TestCase
         $query = User::filter();
 
         $this->assertEquals($query->toSql(), 'select * from "users" where ("name" LIKE ?)');
-
 
         request()->replace([
             'exact' => ['name' => 'Wallace'],
