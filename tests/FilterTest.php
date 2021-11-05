@@ -521,4 +521,89 @@ class FilterTest extends Orchestra\Testbench\TestCase
         $this->assertContains('55', $bindings);
         $this->assertContains('%31%', $bindings);
     }
+
+    public function testApplyFromArray()
+    {
+        (new Filter)->apply($query = User::query(), [
+            'exact' => [
+                'phones.country' => 31
+            ],
+            'contains' => [
+                'name' => 'Wallace'
+            ]
+        ]);
+
+        $expected = User::where(function ($query) {
+
+            $query->where('name', 'LIKE', '%Wallace%');
+
+            $query->whereHas('phones', function ($query) {
+                $query->where('country', 31);
+            });
+
+        })->toSql();
+
+        $this->assertEquals($expected, $query->toSql());
+
+        $this->assertContains('%Wallace%', $query->getBindings());
+        $this->assertContains(31, $query->getBindings());
+
+    }
+
+    public function testGetCallbackFromArray()
+    {
+        $callback = (new Filter)->getCallbackFromArray([
+            'exact' => [
+                'age'            => 99,
+                'phones.country_code' => 55
+            ],
+            'starts_with' => [
+                'last_name' => 'Vizerra'
+            ]
+        ]);
+
+        $expected = User::where(function ($query) {
+
+            $query->where('age', '=', 99);
+            $query->where('last_name', 'LIKE', 'Vizerra%');
+
+            $query->whereHas('phones', function ($query) {
+                $query->where('country_code', 55);
+            });
+
+        })->toSql();
+
+        $query = User::where($callback);
+
+        $this->assertEquals($expected, $query->toSql());
+
+        $this->assertContains('Vizerra%', $query->getBindings());
+        $this->assertContains(55, $query->getBindings());
+        $this->assertContains(99, $query->getBindings());
+
+    }
+
+    public function testGetCallbackFromRequest()
+    {
+        $request = request();
+
+        $request->replace([
+            'exact'       => ['age' => 99 ],
+        ]);
+
+        $callback = (new Filter)->getCallbackFromRequest($request);
+
+        $expected = User::where(function ($query) {
+            $query->where('age', '=', 99);
+        })->toSql();
+
+        $query = User::where($callback);
+
+        $this->assertEquals($expected, $query->toSql());
+        
+        $this->assertContains(99, $query->getBindings());
+
+    }
 }
+
+

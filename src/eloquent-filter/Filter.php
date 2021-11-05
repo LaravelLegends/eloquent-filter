@@ -15,7 +15,6 @@ use LaravelLegends\EloquentFilter\Exceptions\RestrictionException;
  */
 class Filter
 {
-
     /**
      * @var array
      */
@@ -49,7 +48,6 @@ class Filter
      */
     protected $allowedFilters = [];
 
-
     /**
      * @var \Closure|null
      */
@@ -59,11 +57,13 @@ class Filter
      * Apply the filter based on request
      *
      * @param \Illuminate\Database\Eloquent\Builder $query
-     * @param \Illuminate\Http\Request $request
+     * @param \Illuminate\Http\Request|array $input
      */
-    public function apply(Builder $query, Request $request)
+    public function apply(Builder $query, $input)
     {
-        $query->where($this->getCallback($request));
+        $callback = $this->getCallback($input);
+
+        $query->where($callback);
 
         return $this;
     }
@@ -74,8 +74,38 @@ class Filter
      */
     public function applyWithoutNested(Builder $query, Request $request)
     {
-        $this->getCallback($request)->__invoke($query);
-        
+        $this->getCallback($request)($query);
+
+        return $query;
+    }
+
+    /**
+     * Apply the filter basead on Array Data
+     * 
+     * @param Builder $query
+     * @param array   $data
+     */
+
+    public function applyFromArray(Builder $query, array $data)
+    {
+        $query->where(
+            $this->getCallbackFromArray($data)
+        );
+
+        return $query;
+    }
+
+    /**
+     * Apply the filter from Request instance
+     * 
+     * @param Builder $query
+     * @param Request $request
+     */
+
+    public function applyFromRequest(Builder $query, Request $request)
+    {
+        $query->where($this->getCallbackFromRequest($request));
+
         return $query;
     }
 
@@ -85,11 +115,22 @@ class Filter
      * @param Request $request
      * @return \Closure
      */
-    public function getCallback(Request $request): \Closure
+    public function getCallbackFromRequest(Request $request): \Closure
     {
         $preparedData = $this->getPreparedDataFromRequest($request);
 
-        [$baseFilters, $relatedFilters] = $this->getGroupedFiltersByRules($preparedData);
+        return $this->getCallbackFromArray($preparedData);
+    }
+
+    /**
+     * Creates the callback with queries based on array structure
+     * 
+     * @param array $data
+     * @return \Closure
+     */
+    public function getCallbackFromArray(array $data): \Closure
+    {
+        [$baseFilters, $relatedFilters] = $this->getGroupedFiltersByRules($data);
 
         return function ($query) use ($baseFilters, $relatedFilters) {
             foreach ($baseFilters as $rule => $fields) {
@@ -103,9 +144,28 @@ class Filter
                     }
                 });
             }
-            
+
             return $query;
         };
+    }
+
+    /**
+     * Get the callback with queries created from request to filter the models
+     *
+     * @param Request|array $input
+     * @return \Closure
+     */
+    public function getCallback($input): \Closure
+    {
+        if ($input instanceof Request) {
+            return $this->getCallbackFromRequest($input);
+        } elseif (is_array($input)) {
+            return $this->getCallbackFromArray($input);
+        }
+
+        throw new \InvalidArgumentException(
+            'The $input argument should be a Request or array'
+        );
     }
 
     /**
@@ -115,7 +175,7 @@ class Filter
      */
     public function getRulesFromRequest(Request $request)
     {
-        return $this->getPreparedDataFromRequest($request);   
+        return $this->getPreparedDataFromRequest($request);
     }
 
     /**
@@ -128,31 +188,28 @@ class Filter
         $requestData = $this->prepareRequestData($request);
 
         $this->checkAllowedFields($requestData);
-        
-        return $requestData;
 
+        return $requestData;
     }
 
     /**
      * Prepares the request data use in filters
-     * 
+     *
      * @param Request $request
      * @return array
      */
-    protected function prepareRequestData(Request $request): array
+    public function prepareRequestData(Request $request): array
     {
         $rule_keys = array_keys($this->rules);
-        
+
         if (null === $this->dataCallback) {
             return array_filter($request->only($rule_keys));
         }
 
         $rules = [];
-        
+
         foreach ($rule_keys as $rule_key) {
-
             foreach ($request->all() as $key => $value) {
-
                 [$key, $value] = ($this->dataCallback)($rule_key, $key, $value);
 
                 $key && $rules[$rule_key][$key] = $value;
@@ -183,7 +240,6 @@ class Filter
         $rule = $this->getRuleAsCallable($name);
 
         foreach ($fields as $field => $value) {
-
             if ($this->isEmpty($value)) {
                 continue;
             }
@@ -243,7 +299,7 @@ class Filter
      *
      * @return callable
      */
-    public function getRuleAsCallable($name): callable
+    public function getRuleAsCallable(string $name): callable
     {
         $rule = $this->getRule($name);
 
@@ -266,7 +322,7 @@ class Filter
      * @param string $field
      * @return array
      */
-    protected function parseRelation($field): array
+    protected function parseRelation(string $field): array
     {
         $parts = explode($this->relationSeparator, $field);
 
@@ -284,7 +340,7 @@ class Filter
 
         return $index > 0;
     }
-    
+
     /**
      * Gets the separated group of rules with normal fields and related fields
      *
@@ -309,22 +365,21 @@ class Filter
 
         return [$commonFields, $relatedFields];
     }
-    
+
     /**
      * Get grouped field by relations and base
      *
      * @param array $fields
      * @return array
      */
-    protected function getGroupedFields(array $fields)
+    protected function getGroupedFields(array $fields): array
     {
         $related = $base = [];
 
         foreach ($fields as $field => $value) {
-
             if ($this->containsRelation($field)) {
                 [$field, $relation] = $this->parseRelation($field);
-                
+
                 $related[$relation][$field] = $value;
 
                 continue;
@@ -339,7 +394,7 @@ class Filter
 
     /**
      * Define a list of allowed field and rules
-     * 
+     *
      * @deprecated use "allow" instead of
      * @param array $restriction
      * @return self
@@ -351,7 +406,7 @@ class Filter
 
     /**
      * Remove allowedFields
-     * 
+     *
      * @deprecated use "allowAll" instead of
      * @return self
      */
@@ -400,7 +455,7 @@ class Filter
 
     /**
      * Set rules (values) allowed by fields (keys)
-     * 
+     *
      * @param array $allowedFields
      * @return self
      */
@@ -413,7 +468,8 @@ class Filter
 
     /**
      * Remove filter restrictions
-     * 
+     *
+     * @return self
      */
     public function allowAll()
     {
@@ -439,7 +495,7 @@ class Filter
         $filter = new static;
 
         $allowedFilters && $filter->allow($allowedFilters);
-        
+
         $filter->apply($query = $model::query(), $request);
 
         return $query;
