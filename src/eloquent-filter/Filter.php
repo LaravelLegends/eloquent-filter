@@ -454,7 +454,7 @@ class Filter
      */
     public function from($model, $arrayOrRequest = null)
     {
-        $clone = $this;
+        $clone = clone $this;
         
         if (! is_subclass_of($model, Model::class)) {
             throw new \InvalidArgumentException('Only models can be passed by parameter');
