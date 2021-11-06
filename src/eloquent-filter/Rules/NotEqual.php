@@ -2,7 +2,10 @@
 
 namespace LaravelLegends\EloquentFilter\Rules;
 
-class NotEqual implements Searchable
+use LaravelLegends\EloquentFilter\Contracts\ApplicableFilter;
+
+
+class NotEqual implements ApplicableFilter
 {
     public function __invoke($query, $field, $value)
     {

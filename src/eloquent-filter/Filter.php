@@ -5,8 +5,8 @@ namespace LaravelLegends\EloquentFilter;
 use Illuminate\Http\Request;
 use LaravelLegends\EloquentFilter\Rules;
 use Illuminate\Database\Eloquent\Builder;
-use LaravelLegends\EloquentFilter\Rules\Searchable;
 use LaravelLegends\EloquentFilter\Exceptions\RestrictionException;
+use LaravelLegends\EloquentFilter\Contracts\ApplicableFilter;
 
 /**
  * This class creates query filters based on request
@@ -269,12 +269,12 @@ class Filter
      * Sets the rule
      *
      * @param string $name
-     * @param callable|\LaravelLegends\EloquentFilter\Rules\Searchable $rule
-     * @throws \UnexpectedValueException on value is not callable or not implements Searchable interface
+     * @param callable|\LaravelLegends\EloquentFilter\Contracts\ApplicableFilter $rule
+     * @throws \UnexpectedValueException on value is not callable or not implements ApplicableFilter interface
      */
-    public function setRule($name, $rule)
+    public function setRule(string $name, $rule)
     {
-        if ($rule instanceof Searchable || is_callable($rule)) {
+        if ($rule instanceof ApplicableFilter || is_callable($rule)) {
             $this->rules[$name] = $rule;
 
             return $this;

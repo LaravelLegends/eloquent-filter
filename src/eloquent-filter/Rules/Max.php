@@ -2,7 +2,10 @@
 
 namespace LaravelLegends\EloquentFilter\Rules;
 
-class Max implements Searchable
+use LaravelLegends\EloquentFilter\Contracts\ApplicableFilter;
+
+
+class Max implements ApplicableFilter
 {
     public function __invoke($query, $field, $value)
     {

@@ -2,7 +2,10 @@
 
 namespace LaravelLegends\EloquentFilter\Rules;
 
-class NotIn implements Searchable
+use LaravelLegends\EloquentFilter\Contracts\ApplicableFilter;
+
+
+class NotIn implements ApplicableFilter
 {
     public function __invoke($query, $field, $value)
     {

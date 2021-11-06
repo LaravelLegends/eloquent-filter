@@ -2,7 +2,10 @@
 
 namespace LaravelLegends\EloquentFilter\Rules;
 
-class DateExact implements Searchable
+use LaravelLegends\EloquentFilter\Contracts\ApplicableFilter;
+
+
+class DateExact implements ApplicableFilter
 {
     public function __invoke($query, $field, $value)
     {

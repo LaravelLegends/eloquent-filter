@@ -2,7 +2,10 @@
 
 namespace LaravelLegends\EloquentFilter\Rules;
 
-class DateMin implements Searchable
+use LaravelLegends\EloquentFilter\Contracts\ApplicableFilter;
+
+
+class DateMin implements ApplicableFilter
 {
     public function __invoke($query, $field, $value)
     {

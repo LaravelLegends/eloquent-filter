@@ -2,7 +2,10 @@
 
 namespace LaravelLegends\EloquentFilter\Rules;
 
-class EndsWith implements Searchable
+use LaravelLegends\EloquentFilter\Contracts\ApplicableFilter;
+
+
+class EndsWith implements ApplicableFilter
 {
     public function __invoke($query, $field, $value)
     {

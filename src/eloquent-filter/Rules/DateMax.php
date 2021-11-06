@@ -2,7 +2,10 @@
 
 namespace LaravelLegends\EloquentFilter\Rules;
 
-class DateMax implements Searchable
+use LaravelLegends\EloquentFilter\Contracts\ApplicableFilter;
+
+
+class DateMax implements ApplicableFilter
 {
     public function __invoke($query, $field, $value)
     {

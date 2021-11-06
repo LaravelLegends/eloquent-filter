@@ -2,7 +2,10 @@
 
 namespace LaravelLegends\EloquentFilter\Rules;
 
-class YearMin implements Searchable
+use LaravelLegends\EloquentFilter\Contracts\ApplicableFilter;
+
+
+class YearMin implements ApplicableFilter
 {
     public function __invoke($query, $field, $value)
     {

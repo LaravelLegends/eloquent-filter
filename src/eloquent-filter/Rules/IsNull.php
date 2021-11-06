@@ -2,7 +2,10 @@
 
 namespace LaravelLegends\EloquentFilter\Rules;
 
-class IsNull implements Searchable
+use LaravelLegends\EloquentFilter\Contracts\ApplicableFilter;
+
+
+class IsNull implements ApplicableFilter
 {
     public function __invoke($query, $field, $boolean)
     {

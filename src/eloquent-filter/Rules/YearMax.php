@@ -2,7 +2,10 @@
 
 namespace LaravelLegends\EloquentFilter\Rules;
 
-class YearMax implements Searchable
+use LaravelLegends\EloquentFilter\Contracts\ApplicableFilter;
+
+
+class YearMax implements ApplicableFilter
 {
     public function __invoke($query, $field, $value)
     {
