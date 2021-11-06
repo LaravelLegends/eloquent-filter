@@ -81,7 +81,7 @@ class Filter
 
     /**
      * Apply the filter basead on Array Data
-     * 
+     *
      * @param Builder $query
      * @param array   $data
      */
@@ -97,7 +97,7 @@ class Filter
 
     /**
      * Apply the filter from Request instance
-     * 
+     *
      * @param Builder $query
      * @param Request $request
      */
@@ -124,7 +124,7 @@ class Filter
 
     /**
      * Creates the callback with queries based on array structure
-     * 
+     *
      * @param array $data
      * @return \Closure
      */
@@ -169,17 +169,8 @@ class Filter
     }
 
     /**
-     * Extracts the parameters used in model filters from request
-     * @deprecated
-     * @return array
-     */
-    public function getRulesFromRequest(Request $request)
-    {
-        return $this->getPreparedDataFromRequest($request);
-    }
-
-    /**
      * Gets the data from the request to be used in Filters
+     *
      * @param Request $request
      * @return array
      */
@@ -334,7 +325,7 @@ class Filter
      *
      * @return boolean
      */
-    protected function containsRelation($field): bool
+    protected function containsRelation(string $field): bool
     {
         $index = strpos($field, $this->relationSeparator);
 
@@ -391,29 +382,6 @@ class Filter
         return [$base, $related];
     }
 
-
-    /**
-     * Define a list of allowed field and rules
-     *
-     * @deprecated use "allow" instead of
-     * @param array $restriction
-     * @return self
-     */
-    public function restrict(array $allowedFields)
-    {
-        return $this->allow($allowedFields);
-    }
-
-    /**
-     * Remove allowedFields
-     *
-     * @deprecated use "allowAll" instead of
-     * @return self
-     */
-    public function unrestricted()
-    {
-        return $this->allowAll();
-    }
 
     /**
      * Check if filter contains allowedFields

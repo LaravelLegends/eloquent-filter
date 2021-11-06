@@ -13,23 +13,30 @@ trait HasFilter
     /**
      * Scope for apply filters from Request
      * 
-     * @param Builder $query
+     * @param \Illuminate\Database\Eloquent\Builder $query
      * @param Illuminate\Http\Request|array $arrayOrRequest
+     * 
+     * @return Builder
      */
     public function scopeFilter($query, $arrayOrRequest = null)
     {
         $filter = $this->getEloquentFilter();
 
-        $allowedFilters = $this->allowedFilters ?? $this->filterRestrictions ?? null;
-
-        $allowedFilters && $filter->allow($allowedFilters);
+        if (property_exists($this, 'allowedFilters')) {
+            $filter->allow($this->allowedFilters);
+        }
         
         $filter->apply($query, $arrayOrRequest ?: app('request'))->allowAll();
         
         return $query;
     }
 
-    public function getEloquentFilter()
+    /**
+     * Gets the Eloquent Filter instance
+     * 
+     * @return \LaravelLegends\EloquentFilter\Filter
+     */
+    public function getEloquentFilter(): Filter
     {
         return app(Filter::class);
     }
