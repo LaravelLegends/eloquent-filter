@@ -280,6 +280,29 @@ class User extends Model
 }
 ```
 
+... Or with implementation of `Filterable` method:
+
+
+```php
+
+use LaravelLegends\EloquentFilter\HasFilter;
+use LaravelLegends\EloquentFilter\Contracts\Filterable;
+
+class User extends Model implements Filterable
+{
+    use HasFilter;
+
+    public function getFilterable(): array 
+    {
+        return [
+            'name'         => 'contains',
+            'phone.number' => 'contains',
+            'price'        => ['max', 'min'],
+            'profile_id'   => '*',
+        ];
+    }
+}
+```
 
 ### Using the allow method
 
