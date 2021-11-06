@@ -604,6 +604,33 @@ class FilterTest extends Orchestra\Testbench\TestCase
         $this->assertContains(99, $query->getBindings());
 
     }
+
+    public function testFrom()
+    {
+        $data = [
+            'min' => ['age' => 18]
+        ];
+
+        $actual1 = (new Filter)->from(User::class, $data)->toSql();
+
+        $expected1 = User::where(function ($query) {
+            $query->where('age', '>=', 18);
+        })->toSql();
+
+        $this->assertEquals($expected1, $actual1);
+
+        $request = request();
+        $request->replace($data + ['exact' => ['email' => 'wallacemaxters@gmail.com']]);
+
+        $expected2 = User::where(function ($query) {
+            $query->where('age', '>=', 18)->where('email', 'wallacemaxters@gmail.com');
+        })->toSql();
+
+        $actual2 = (new Filter)->from(new User, $request)->toSql();
+
+        $this->assertEquals($expected2, $actual2);
+
+    }
 }
 
 

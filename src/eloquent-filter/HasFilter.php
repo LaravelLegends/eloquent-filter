@@ -2,6 +2,7 @@
 
 namespace LaravelLegends\EloquentFilter;
 
+use LaravelLegends\EloquentFilter\Contracts\Filterable;
 use LaravelLegends\EloquentFilter\Filter;
 /**
  * This trait can be used in Eloquent models
@@ -22,7 +23,9 @@ trait HasFilter
     {
         $filter = $this->getEloquentFilter();
 
-        if (property_exists($this, 'allowedFilters')) {
+        if ($this instanceof Filterable) {
+            $filter->allow($this->getFilterable());
+        } elseif (property_exists($this, 'allowedFilters')) {
             $filter->allow($this->allowedFilters);
         }
         

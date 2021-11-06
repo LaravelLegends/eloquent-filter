@@ -5,8 +5,10 @@ namespace LaravelLegends\EloquentFilter;
 use Illuminate\Http\Request;
 use LaravelLegends\EloquentFilter\Rules;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Model;
 use LaravelLegends\EloquentFilter\Exceptions\RestrictionException;
 use LaravelLegends\EloquentFilter\Contracts\ApplicableFilter;
+use LaravelLegends\EloquentFilter\Contracts\Filterable;
 
 /**
  * This class creates query filters based on request
@@ -447,6 +449,35 @@ class Filter
     }
 
     /**
+     * 
+     * 
+     */
+    public function from($model, $arrayOrRequest = null)
+    {
+        $clone = $this;
+        
+        if (! is_subclass_of($model, Model::class)) {
+            throw new \InvalidArgumentException('Only models can be passed by parameter');
+        }
+        
+        if (is_subclass_of($model, Filterable::class)) {
+
+            $instance = is_object($model) ? $model : new $model;
+
+            $query = $instance->newQuery();
+
+            $clone->allow($instance->getFilterable());
+            
+        } else {
+            $query = $model::query();
+        }
+
+        $clone->apply($query, $arrayOrRequest ?? app('request'));
+
+        return $query;
+    }
+
+    /**
      * Apply filter directly in model
      *
      * @param string Model class
@@ -456,7 +487,7 @@ class Filter
      */
     public static function fromModel($model, Request $request, array $allowedFilters = [])
     {
-        if (! is_subclass_of($model, \Illuminate\Database\Eloquent\Model::class)) {
+        if (! is_subclass_of($model, Model::class)) {
             throw new \InvalidArgumentException('Only models can be passed by parameter');
         }
 
