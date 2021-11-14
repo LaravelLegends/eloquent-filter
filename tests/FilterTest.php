@@ -2,7 +2,8 @@
 
 use LaravelLegends\EloquentFilter\Exceptions\RestrictionException;
 use LaravelLegends\EloquentFilter\Filter;
-use phpDocumentor\Reflection\DocBlock\Tags\Var_;
+use Models\User;
+use Models\UserPhone;
 
 class FilterTest extends Orchestra\Testbench\TestCase
 {

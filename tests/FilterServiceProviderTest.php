@@ -1,6 +1,7 @@
 <?php
 
 use LaravelLegends\EloquentFilter\FilterServiceProvider;
+use Models\User;
 
 class FilterServiceProviderTest extends Orchestra\Testbench\TestCase
 {
