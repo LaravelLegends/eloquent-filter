@@ -26,6 +26,7 @@ The `LaravelLegends\EloquentFilter\HasFilter` trait can be used in models that w
 This trait provides the `filter` method for model.
  
 #### Example
+
 Model:
 ```php
 use LaravelLegends\EloquentFilter\HasFilter;
@@ -97,6 +98,8 @@ class UsersController extends Controller
     }
 }
 ```
+
+
 Note that in second example, is required to pass a `Request` instance as argument. It is a very useful in cases where you need to use a custom `Request` instance (made by `artisan make:request` command).
 
 ## What does it do?
@@ -104,32 +107,39 @@ Note that in second example, is required to pass a `Request` instance as argumen
 This library internally apply filters based on query string parameters with special keyworks names.
 
 
-## `max`
-
+## max
 The maximum value of a column. The url `api/users?max[field]=100` is like a `User::where('field', '<=', 100)`.
 
-## `min`
+----
+
+## min
 The minimum value of a column. The url `api/users?min[age]=33` is like a `User::where('age', '>=', 33)`.
 
-## `contains`
+----
+
+## contains
 A search term contained in a column.
 The url `api/users?contains[name]=wallace` is like a `User::where('name', 'LIKE', '%wallace%')`.
 
-## `ends_with`
+----
+
+## ends_with
+
 Search a value according to end content of string. Sounds like a `LIKE` with `%$value` value.
 
-## `starts_with`
+----
 
+## starts_with
 Filter the field when the value starts with a certain value.
-
 A url `api/users?starts_with[name]=brcontainer` Sounds like a  `User::where('name', 'LIKE', 'brcontainer%')`.
+----
 
-## `exact`
+## exact
 Search by a exact value of the field·
-
 A url `api/users?exact[email]=teste@teste.com` Sounds like a  `User::where('name', '=', 'teste@teste.com')`.
+----
 
-## `has`
+## has
 
 Filter by relationship. You can use the `0` or `1` value.
 
@@ -139,9 +149,8 @@ The url `api/users?has[posts]=1` is like a `User::has('posts')`
 
 The url `api/users?has[posts]=0` is like a `User::doesntHave('posts')`
 
-
-
-## `is_null`
+----
+## is_null
 
 Apply `WHERE IS NULL` or `WHERE IS NOT NULL` to a query.
 
@@ -151,9 +160,8 @@ The url `api/users?is_null[cpf]=1` is like a `User::whereNull('cpf')`
 
 The url `api/users?is_null[age]=0` is like a `User::whereNotNull('age')`
 
-
-
-## `not_in`
+----
+## not_in
 
 Searchs when a column NOT HAS the passed values.
 
@@ -161,10 +169,10 @@ Example:
 
 A url `api/users?not_in[role][]=1&not_in[role][]=2` é equivalente à `User::whereNotIn('role', [1, 2])`
 
-**Observação**: When the `not_in[my_field]` is a empty array, no action will be taken.
+**Note**: When the `not_in[my_field]` is a empty array, no action will be taken.
 
-
-## `in`
+----
+## in
 
 Searchs when a column HAS the passed values.
 
@@ -174,33 +182,75 @@ The url `api/users?in[role][]=10&in[role][]=20` sounds like a `User::whereIn('ro
 
 **NOTE**: When the `in[my_field]` is a empty array, no action will be taken.
 
-## `date_max`
+----
+
+## date_max
 Search by a maximium value of a date field.
 
-A url `api/users?date_max[created_at]=2021-01-01` é equivalente a `User::whereDate('created_at', '<=', '2021-01-01')`
+A url `api/users?date_max[created_at]=2021-01-01` sounds like a `User::whereDate('created_at', '<=', '2021-01-01')`
 
-## `date_min`
+----
+
+## date_min
 
 Search by a minimun value of a date field.
 
 Example:
 
-A url `api/users?date_min[created_at]=2021-01-01` é equivalente a `User::whereDate('created_at', '>=', '2021-01-01')`
+A url `api/users?date_min[created_at]=2021-01-01` sounds like a `User::whereDate('created_at', '>=', '2021-01-01')`
 
+----
 
-## `not_equal`
+## not_equal
 
-Aplica um filtro utilizando o operador "não igual".
+Search by not equal value passed. If you use in related field, the whereDoesntHave will be applied applied.
 
 Example:
 
-A url `api/users?not_equal[profile_id]=3` é equivalente a `User::where('profile_id', '<>', '3')`
+The url `api/users?not_equal[profile_id]=3` sounds like a 
 
-## `year_max`
+```php
+User::where('profile_id', '<>', '3');
+```
 
-## `year_min`
+The url `api/users?not_equal[roles.id]=1` sounds like a 
 
-## `year_exact`
+```php
+User::whereDoesntHave('roles', fn ($query) => $query->where('id', '=', 3));
+```
+
+----
+
+## year_max
+
+The url `api/users?year_max[created_at]=2000` sounds like a
+
+```php
+User::whereYear('created_at', '<=', 2000);
+```
+
+----
+
+## year_min
+
+The url `api/users?year_min[created_at]=1998` sounds like a
+
+```php
+User::whereYear('created_at', '>=', 1998);
+```
+
+----
+
+## year_exact
+
+
+The url `api/users?year_exact[created_at]=1998` sounds like a
+
+```php
+User::whereYear('created_at', '=', 1998);
+```
+
+---
 
 
 ## Filtering relationship fields
