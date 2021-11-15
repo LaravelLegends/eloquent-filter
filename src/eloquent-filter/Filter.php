@@ -140,11 +140,9 @@ class Filter
             }
 
             foreach ($relatedFilters as $relation => $rules) {
-                $query->whereHas($relation, function ($subquery) use ($rules) {
-                    foreach ($rules as $rule => $fields) {
-                        $this->applyRule($subquery, $rule, $fields);
-                    }
-                });
+                foreach ($rules as $rule => $fields) {
+                    $this->applyRuleToRelated($query, $rule, $relation, $fields);
+                }
             }
 
             return $query;
@@ -228,7 +226,7 @@ class Filter
      *
      * @return static
      */
-    public function applyRule($query, $name, array $fields)
+    public function applyRule($query, string $name, array $fields)
     {
         $rule = $this->getRuleAsCallable($name);
 
@@ -241,6 +239,26 @@ class Filter
         }
 
         return $this;
+    }
+
+    protected function applyRuleToRelated($query, string $name, string $relation, array $fields)
+    {
+        $rule = $this->getRuleAsCallable($name);
+
+        if ($rule instanceof RelationFilter) {
+            foreach ($fields as $field => $value) {
+                $rule->forRelation($query, $relation, $field, $value);
+            }
+
+            return $this;
+        }
+
+        $query->whereHas($relation, function ($query) use ($name, $fields) {
+            $this->applyRule($query, $name, $fields);
+        });        
+
+        return $this;
+
     }
 
     /**
