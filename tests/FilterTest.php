@@ -638,13 +638,15 @@ class FilterTest extends Orchestra\Testbench\TestCase
 
     }
 
-    public function testFrom()
+    public function testApplyToModel()
     {
         $data = [
             'min' => ['age' => 18]
         ];
 
-        $actual1 = (new Filter)->from(User::class, $data)->toSql();
+        $filter = new Filter;
+
+        $actual1 = $filter->applyToModel(User::class, $data)->toSql();
 
         $expected1 = User::where(function ($query) {
             $query->where('age', '>=', 18);
@@ -659,7 +661,7 @@ class FilterTest extends Orchestra\Testbench\TestCase
             $query->where('email', 'wallacemaxters@gmail.com')->where('age', '>=', 18);
         })->toSql();
 
-        $actual2 = (new Filter)->from(new User, $request)->toSql();
+        $actual2 = (new Filter)->applyToModel(new User, $request)->toSql();
 
         $this->assertEquals($expected2, $actual2);
 

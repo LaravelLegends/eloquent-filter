@@ -468,10 +468,13 @@ class Filter
     }
 
     /**
+     * Apply filter to Model instance or class
      * 
-     * 
+     * @param string|\Illuminate\Database\Eloquent\Model $model
+     * @param array|\Illuminate\Http\Request $arrayOrRequest
+     * @return \Illuminate\Database\Eloquent\Builder
      */
-    public function from($model, $arrayOrRequest = null)
+    public function applyToModel($model, $arrayOrRequest = null)
     {
         $clone = clone $this;
         

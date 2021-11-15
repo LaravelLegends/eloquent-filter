@@ -19,9 +19,9 @@ class FilterServiceProviderTest extends Orchestra\Testbench\TestCase
         $this->assertEquals($min, \LaravelLegends\EloquentFilter\Rules\Min::class);
     }
 
-    public function testFrom()
+    public function testApplyToModel()
     {
-        $query = \LaravelLegends\EloquentFilter\Facades\Filter::from(User::class, [
+        $query = \LaravelLegends\EloquentFilter\Facades\Filter::applyToModel(User::class, [
             'exact' => ['name' => 'Wallace']
         ]);
 
