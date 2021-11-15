@@ -20,6 +20,6 @@
         "orchestra/testbench": "^3.4"
     },
     "scripts": {
-        "test" : "vendor/bin/phpunit"
+        "test" : "./vendor/bin/phpunit"
     }
 }
