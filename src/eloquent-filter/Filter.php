@@ -22,23 +22,23 @@ class Filter
      * @var array
      */
     protected $rules = [
-        'max'         => Rules\Max::class,
-        'min'         => Rules\Min::class,
         'contains'    => Rules\Contains::class,
-        'ends_with'   => Rules\EndsWith::class,
-        'starts_with' => Rules\StartsWith::class,
-        'exact'       => Rules\Exact::class,
-        'has'         => Rules\Has::class,
-        'is_null'     => Rules\IsNull::class,
-        'in'          => Rules\In::class,
-        'not_in'      => Rules\NotIn::class,
+        'date_exact'  => Rules\DateExact::class,
         'date_max'    => Rules\DateMax::class,
         'date_min'    => Rules\DateMin::class,
-        'date_exact'  => Rules\DateExact::class,
+        'ends_with'   => Rules\EndsWith::class,
+        'exact'       => Rules\Exact::class,
+        'has'         => Rules\Has::class,
+        'in'          => Rules\In::class,
+        'is_null'     => Rules\IsNull::class,
+        'max'         => Rules\Max::class,
+        'min'         => Rules\Min::class,
         'not_equal'   => Rules\NotEqual::class,
+        'not_in'      => Rules\NotIn::class,
+        'starts_with' => Rules\StartsWith::class,
         'year_exact'  => Rules\YearExact::class,
-        'year_min'    => Rules\YearMin::class,
         'year_max'    => Rules\YearMax::class,
+        'year_min'    => Rules\YearMin::class,
     ];
 
     /**
