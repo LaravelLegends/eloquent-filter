@@ -51,7 +51,11 @@ class FilterTest extends Orchestra\Testbench\TestCase
 
         (new Filter)->apply($query = User::query(), request());
 
-        $this->assertTrue($query->toSql() === 'select * from "users" where ("likes" >= ?)');
+        $expected = User::where(function ($query) {
+            $query->where('likes', '>=', 500);
+        })->toSql();
+
+        $this->assertEquals($expected, $query->toSql());
 
         $this->assertContains('500', $query->getBindings());
     }
@@ -195,14 +199,19 @@ class FilterTest extends Orchestra\Testbench\TestCase
     public function testFromModel()
     {
         request()->replace([
-            'max'      => ['age' => '18'],
             'contains' => ['name' => 'wallace'],
+            'max'      => ['age' => '18'],
         ]);
 
         $query = Filter::fromModel(User::class, request());
 
-        $this->assertTrue(
-            $query->toSql() == 'select * from "users" where ("age" <= ? and "name" LIKE ?)'
+        $expected = User::where(function ($query) {
+            $query->where('name', 'LIKE', '%wallace%')->where('age', '<=', 18);
+        })->toSql();
+
+        $this->assertEquals(
+            $expected,
+            $query->toSql()
         );
 
         $bindings = $query->getBindings();
@@ -351,9 +360,11 @@ class FilterTest extends Orchestra\Testbench\TestCase
 
     public function testNotEqual()
     {
-        request()->replace(['not_equal' => ['profile_id' => '3']]);
+       $request = request();
+       
+       $request->replace(['not_equal' => ['profile_id' => '3']]);
 
-        (new Filter)->apply($query = User::query(), request());
+        (new Filter)->apply($query = User::query(), $request);
 
         $expected = User::where(function ($q) {
             $q->where('profile_id', '<>', '3');
@@ -482,19 +493,38 @@ class FilterTest extends Orchestra\Testbench\TestCase
         $request = request();
 
         $request->replace([
-            'exact'    => ['phones.country' => '55'],
-            'contains' => ['phones.number' => '4321', 'phones.ddd' => '32']
+            'contains'  => ['phones.number'  => '4321', 'phones.ddd' => '32'],
+            'exact'     => ['phones.country' => '55'],
+            'not_equal' => ['roles.id'       => '2'],
         ]);
+
+        $expected = User::where(static function ($query) {
+
+            // contains
+            $query->whereHas('phones', static function ($query) {
+                $query->where('number', 'LIKE', '%4321%')->where('ddd', 'LIKE', '%32%');
+            });
+
+            // exact 
+            $query->whereHas('phones', static function ($query) {
+                $query->where('country', '=', 55);
+            });
+
+            // not_equal
+            $query->whereDoesntHave('roles', function ($query) {
+                $query->where('id', '=', 2);
+            });
+            
+        })->toSql();
 
         (new Filter)->apply($query = User::query(), $request);
 
-        $expected_sql = 'select * from "users" where (exists (select * from "user_phones" where "users"."id" = "user_phones"."user_id" and "number" LIKE ? and "ddd" LIKE ? and "country" = ?))';
-
-        $this->assertEquals($query->toSql(), $expected_sql);
+        $this->assertEquals($expected, $query->toSql());
 
         $this->assertContains('%4321%', $bindings = $query->getBindings());
         $this->assertContains('%32%', $bindings);
         $this->assertContains('55', $bindings);
+        $this->assertContains('2', $bindings);
     }
 
 
@@ -626,12 +656,38 @@ class FilterTest extends Orchestra\Testbench\TestCase
         $request->replace($data + ['exact' => ['email' => 'wallacemaxters@gmail.com']]);
 
         $expected2 = User::where(function ($query) {
-            $query->where('age', '>=', 18)->where('email', 'wallacemaxters@gmail.com');
+            $query->where('email', 'wallacemaxters@gmail.com')->where('age', '>=', 18);
         })->toSql();
 
         $actual2 = (new Filter)->from(new User, $request)->toSql();
 
         $this->assertEquals($expected2, $actual2);
 
+    }
+
+    public function testRelationFilterMethods()
+    {
+        $request = request();
+
+        $request->replace([
+            'not_equal' => ['roles.disabled' => '1'],
+            'not_in'    => ['roles.name' => ['Owner', 'Admin']],
+        ]);
+
+        $expected = User::where(static function ($query) {
+            // not_equal
+            $query->whereDoesntHave('roles', function ($query) {
+                $query->where('disabled', '=', '1');
+            });
+
+            // not_in
+            $query->whereDoesntHave('roles', function ($query) {
+                $query->whereIn('name', ['Owner', 'Admin']);
+            });
+        })->toSql();
+
+        (new Filter)->apply($query = User::query(), $request);
+
+        $this->assertEquals($expected, $query->toSql());
     }
 }

@@ -9,6 +9,7 @@ use Illuminate\Database\Eloquent\Model;
 use LaravelLegends\EloquentFilter\Exceptions\RestrictionException;
 use LaravelLegends\EloquentFilter\Contracts\ApplicableFilter;
 use LaravelLegends\EloquentFilter\Contracts\Filterable;
+use LaravelLegends\EloquentFilter\Contracts\RelationFilter;
 
 /**
  * This class creates query filters based on request

@@ -12,10 +12,14 @@ class User extends Model implements Filterable
     protected $table = 'users';
 
     public $allowedFilters = [
-        'name'     => 'contains',
-        'email'    => true,
-        'age'      => ['max', 'min'],
-        'roles.id' => ['exact', 'not_equal'],
+        'name'           => 'contains',
+        'email'          => true,
+        'age'            => ['max', 'min'],
+        'roles.id'       => ['exact', 'not_equal'],
+
+        'roles.name'     => ['in', 'not_in'],
+        'roles.disabled' => '*'
+        
     ];
 
     public function getFilterable(): array
