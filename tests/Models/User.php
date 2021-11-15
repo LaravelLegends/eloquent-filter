@@ -12,9 +12,10 @@ class User extends Model implements Filterable
     protected $table = 'users';
 
     public $allowedFilters = [
-        'name' => 'contains',
-        'email' => true,
-        'age'   => ['max', 'min'],
+        'name'     => 'contains',
+        'email'    => true,
+        'age'      => ['max', 'min'],
+        'roles.id' => ['exact', 'not_equal'],
     ];
 
     public function getFilterable(): array
@@ -31,4 +32,10 @@ class User extends Model implements Filterable
     {
         return $this->hasMany(UserDocument::class);
     }
+
+    public function roles()
+    {
+        return $this->belongsToMany(Role::class, 'users_roles');
+    }
+
 }
