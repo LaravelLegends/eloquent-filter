@@ -336,6 +336,7 @@ class FilterTest extends Orchestra\Testbench\TestCase
         try {
             $filter->setRule('rule', 'invalid_value');
         } catch (\Exception $e) {
+            $this->assertEquals($e->getMessage(), 'The rule should be callable or instance of LaravelLegends\EloquentFilter\Contracts\ApplicableFilter');
             $this->assertTrue($e instanceof \UnexpectedValueException);
         }
     }

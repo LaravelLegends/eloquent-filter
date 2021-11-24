@@ -320,7 +320,7 @@ class Filter
             return $this;
         }
 
-        throw new \UnexpectedValueException('The rule should be callable or instance of ' . Searchable::class);
+        throw new \UnexpectedValueException('The rule should be callable or instance of ' . ApplicableFilter::class);
     }
 
     /**
