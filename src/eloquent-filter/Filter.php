@@ -12,7 +12,7 @@ use LaravelLegends\EloquentFilter\Contracts\Filterable;
 use LaravelLegends\EloquentFilter\Contracts\RelationFilter;
 
 /**
- * This class creates query filters based on request
+ * This class create easy filters for Eloquent model basead defined rules using an Array or Request data 
  *
  * @author Wallace Maxters <wallacemaxters@gmail.com>
  */
@@ -61,8 +61,9 @@ class Filter
      *
      * @param \Illuminate\Database\Eloquent\Builder $query
      * @param \Illuminate\Http\Request|array $input
+     * @return self
      */
-    public function apply(Builder $query, $input)
+    public function apply(Builder $query, $input): self
     {
         $callback = $this->getCallback($input);
 
@@ -74,8 +75,11 @@ class Filter
     /**
      * Apply the filter based on request without nested where
      *
+     * @param Builder $query
+     * @param Request $request
+     * @return Builder
      */
-    public function applyWithoutNested(Builder $query, Request $request)
+    public function applyWithoutNested(Builder $query, Request $request): Builder
     {
         $this->getCallback($request)($query);
 
@@ -87,9 +91,9 @@ class Filter
      *
      * @param Builder $query
      * @param array   $data
+     * @return Builder
      */
-
-    public function applyFromArray(Builder $query, array $data)
+    public function applyFromArray(Builder $query, array $data): Builder
     {
         $query->where(
             $this->getCallbackFromArray($data)
@@ -101,11 +105,11 @@ class Filter
     /**
      * Apply the filter from Request instance
      *
-     * @param Builder $query
+     * @param \Illuminate\Database\Eloquent\Builder $query
      * @param Request $request
+     * @return mixed
      */
-
-    public function applyFromRequest(Builder $query, Request $request)
+    public function applyFromRequest(Builder $query, Request $request): Builder
     {
         $query->where($this->getCallbackFromRequest($request));
 
@@ -211,7 +215,14 @@ class Filter
         return $rules;
     }
 
-    public function setDataCallback(callable $callback)
+    
+    /**
+     * Define callback for passed data in array or request
+     *
+     * @param callable $callback
+     * @return self
+     */
+    public function setDataCallback(callable $callback): self
     {
         $this->dataCallback = $callback;
 
@@ -225,7 +236,7 @@ class Filter
      * @param string $name
      * @param array $fields
      *
-     * @return static
+     * @return self
      */
     public function applyRule($query, string $name, array $fields)
     {
@@ -242,7 +253,17 @@ class Filter
         return $this;
     }
 
-    protected function applyRuleToRelated($query, string $name, string $relation, array $fields)
+
+    /**
+     *  Applies rules to related field
+     *
+     * @param \Illuminate\Database\Eloquent\Builder $query
+     * @param string $name
+     * @param string $relation
+     * @param array $fields
+     * @return self
+     */
+    protected function applyRuleToRelated(Builder $query, string $name, string $relation, array $fields): self
     {
         $rule = $this->getRuleAsCallable($name);
 
@@ -256,10 +277,9 @@ class Filter
 
         $query->whereHas($relation, function ($query) use ($name, $fields) {
             $this->applyRule($query, $name, $fields);
-        });        
+        });
 
         return $this;
-
     }
 
     /**
@@ -272,7 +292,6 @@ class Filter
     {
         return $this->rules[$name];
     }
-
 
     /**
      * Check if contains rule by name
@@ -469,7 +488,7 @@ class Filter
 
     /**
      * Apply filter to Model instance or class
-     * 
+     *
      * @param string|\Illuminate\Database\Eloquent\Model $model
      * @param array|\Illuminate\Http\Request $arrayOrRequest
      * @return \Illuminate\Database\Eloquent\Builder
@@ -483,13 +502,11 @@ class Filter
         }
         
         if (is_subclass_of($model, Filterable::class)) {
-
             $instance = is_object($model) ? $model : new $model;
 
             $query = $instance->newQuery();
 
             $clone->allow($instance->getFilterable());
-            
         } else {
             $query = $model::query();
         }
