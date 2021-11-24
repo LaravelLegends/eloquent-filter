@@ -130,13 +130,16 @@ Search a value according to end content of string. Sounds like a `LIKE` with `%$
 ----
 
 ## starts_with
+
 Filter the field when the value starts with a certain value.
 A url `api/users?starts_with[name]=brcontainer` Sounds like a  `User::where('name', 'LIKE', 'brcontainer%')`.
+
 ----
 
 ## exact
 Search by a exact value of the field·
 A url `api/users?exact[email]=teste@teste.com` Sounds like a  `User::where('name', '=', 'teste@teste.com')`.
+
 ----
 
 ## has
