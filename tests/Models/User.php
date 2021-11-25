@@ -16,7 +16,6 @@ class User extends Model implements Filterable
         'email'          => true,
         'age'            => ['max', 'min'],
         'roles.id'       => ['exact', 'not_equal'],
-
         'roles.name'     => ['in', 'not_in'],
         'roles.disabled' => '*'
         

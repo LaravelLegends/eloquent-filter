@@ -23,6 +23,8 @@ class UserFilter extends ModelFilter
             'id'   => 'eq',
             'age'  => ['max', 'min'],
             'name' => ['contains', 'icontains'],
+            'phones' => new UserPhoneFilter,
+            'roles'  => new RoleFilter,
         ];
     }
 }

@@ -17,4 +17,9 @@ class Role extends Model implements Filterable
             'id'   => 'exact'
         ];
     }
+
+    public function users()
+    {
+        return $this->belongsToMany(User::class, 'users_roles');
+    }
 }
