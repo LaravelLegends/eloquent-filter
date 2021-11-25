@@ -18,6 +18,8 @@ use LaravelLegends\EloquentFilter\Contracts\RelationFilter;
  */
 class Filter
 {
+    const RELATION_SEPARATOR = '.';
+
     /**
      * @var array
      */
@@ -40,11 +42,6 @@ class Filter
         'year_max'    => Rules\YearMax::class,
         'year_min'    => Rules\YearMin::class,
     ];
-
-    /**
-     * @var string
-     */
-    protected $relationSeparator = '.';
 
     /**
      * @var array
@@ -353,11 +350,11 @@ class Filter
      * @param string $field
      * @return array
      */
-    protected function parseRelation(string $field): array
+    public static function parseRelation(string $field): array
     {
-        $parts = explode($this->relationSeparator, $field);
+        $parts = explode(static::RELATION_SEPARATOR, $field);
 
-        return [array_pop($parts), implode($this->relationSeparator, $parts)];
+        return [array_pop($parts), implode(static::RELATION_SEPARATOR, $parts)];
     }
 
     /**
@@ -365,9 +362,9 @@ class Filter
      *
      * @return boolean
      */
-    protected function containsRelation(string $field): bool
+    public static function containsRelation(string $field): bool
     {
-        $index = strpos($field, $this->relationSeparator);
+        $index = strpos($field, static::RELATION_SEPARATOR);
 
         return $index > 0;
     }
@@ -408,8 +405,8 @@ class Filter
         $related = $base = [];
 
         foreach ($fields as $field => $value) {
-            if ($this->containsRelation($field)) {
-                [$field, $relation] = $this->parseRelation($field);
+            if (static::containsRelation($field)) {
+                [$field, $relation] = static::parseRelation($field);
 
                 $related[$relation][$field] = $value;
 
