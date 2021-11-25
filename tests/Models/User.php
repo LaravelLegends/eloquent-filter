@@ -3,11 +3,12 @@
 namespace Models;
 
 use Illuminate\Database\Eloquent\Model;
+use LaravelLegends\EloquentFilter\Concerns\HasFilter;
 use LaravelLegends\EloquentFilter\Contracts\Filterable;
-use LaravelLegends\EloquentFilter\HasFilter;
 class User extends Model implements Filterable
 {
     use HasFilter;
+    
 
     protected $table = 'users';
 

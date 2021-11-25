@@ -1,6 +1,8 @@
 <?php
 
-use LaravelLegends\EloquentFilter\ModelFilter;
+namespace Filters;
+
+use LaravelLegends\EloquentFilter\Filters\ModelFilter;
 
 class RoleFilter extends ModelFilter
 {

@@ -1,10 +1,12 @@
 <?php
 
-namespace LaravelLegends\EloquentFilter;
+namespace LaravelLegends\EloquentFilter\Concerns;
 
 use Illuminate\Database\Eloquent\Builder;
 use LaravelLegends\EloquentFilter\Contracts\Filterable;
 use LaravelLegends\EloquentFilter\Filter;
+use LaravelLegends\EloquentFilter\Filters\ModelFilter;
+
 /**
  * This trait can be used in Eloquent models
  * 

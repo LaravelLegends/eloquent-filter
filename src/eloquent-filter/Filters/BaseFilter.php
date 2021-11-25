@@ -1,8 +1,8 @@
 <?php
 
-use LaravelLegends\EloquentFilter\ModelFilter;
+namespace LaravelLegends\EloquentFilter\Filters;
 
-class CustomFilter extends ModelFilter
+class BaseFilter extends ModelFilter
 {
     protected $filterable = [];
 

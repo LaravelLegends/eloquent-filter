@@ -1,9 +1,12 @@
 <?php
 
+use Filters\UserFilter;
+use Filters\UserPhoneFilter;
 use Models\User;
 use Models\UserPhone;
 use Illuminate\Http\Request;
 use LaravelLegends\EloquentFilter\Filter;
+use LaravelLegends\EloquentFilter\Filters\BaseFilter;
 use LaravelLegends\EloquentFilter\Providers\FilterServiceProvider;
 
 class ModelFilterTest extends Orchestra\Testbench\TestCase
@@ -62,7 +65,7 @@ class ModelFilterTest extends Orchestra\Testbench\TestCase
 
     public function testModelGetFilterable()
     {
-        $modelFilter = new CustomFilter([
+        $modelFilter = new BaseFilter([
             'id' => 'exact'
         ]);
 
@@ -74,19 +77,19 @@ class ModelFilterTest extends Orchestra\Testbench\TestCase
     {
         // Finge que é um Post de um blog =)
 
-        $modelFilter = new CustomFilter([
+        $modelFilter = new BaseFilter([
             'id' => 'exact',
             'slug' => 'exact',
             'title' => true,
-            'tags' => new CustomFilter([
+            'tags' => new BaseFilter([
                 'id'   => ['exact', 'not_equal'],
                 'name' => 'contains'
             ]),
-            'author' => new CustomFilter([
+            'author' => new BaseFilter([
                 'email' => 'exact',
                 'name' => ['contains', 'starts_with']
             ]),
-            'author.roles' => new CustomFilter([
+            'author.roles' => new BaseFilter([
                 'id' => ['exact', 'not_equal']
             ]),
             'views.count' => ['max', 'min', 'exact'], // manual related
@@ -125,7 +128,7 @@ class ModelFilterTest extends Orchestra\Testbench\TestCase
 
         $this->assertEquals(
             $expected,
-            User::where(CustomFilter::toClosure($arrayInput, [ 'id' => 'not_equal' ]))->toSql()
+            User::where(BaseFilter::toClosure($arrayInput, [ 'id' => 'not_equal' ]))->toSql()
         );
     }
 
