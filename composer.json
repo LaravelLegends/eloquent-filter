@@ -21,5 +21,12 @@
     },
     "require-dev": {
         "orchestra/testbench": "^4.0"
+    },
+     "extra": {
+        "laravel": {
+            "providers": [
+                "LaravelLegends\\EloquentFilters\\Providers\\FilterServiceProvider"
+            ]
+        }
     }
 }
