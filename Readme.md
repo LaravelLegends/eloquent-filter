@@ -41,8 +41,8 @@ Controller:
 
 
 ```php
-class UsersController extends Controller {
-
+class UsersController extends Controller 
+{
     use App\Models\User;
     
     public function index()
@@ -66,11 +66,29 @@ class UsersController extends Controller {
 }
 ```
 
-### Using the `Filter` class
+### Using a Filterable class 
 
-Yo can also use the `Filter` directly.
+Yo can also use the `Filterable` interface to create filters for your Model. You can inherit the ModelFilter class to create a custom filter for a model.
 
-See:
+Example:
+
+```php
+namespace App\Filters;
+use LaravelLegends\EloquentFilter\ModelFilter;
+
+class UserFilter extends ModelFilter 
+{
+    public function getFilterable(): array
+    {
+        return [
+            'id' => 'exact',
+            'name' => ['contains', 'starts_with'],
+        ];
+    }
+}
+```
+
+In Model
 
 ```php
 use App\Models\User;
@@ -81,20 +99,7 @@ class UsersController extends Controller
 {
     public function index(Request $request)
     {
-        $query = Filter::fromModel(User::class, $request);
-
-        return $query->paginate();
-    }
-
-    // or
-
-    public function index(Request $request)
-    {
-        $query = User::orderBy('name');
-
-        (new Filter)->apply($query, $request);
-
-        return $query->paginate();
+        return User::withFilter(new UserFilter, $request)->orderBy('name');
     }
 }
 ```
