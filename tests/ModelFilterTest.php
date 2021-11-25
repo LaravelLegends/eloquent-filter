@@ -1,8 +1,10 @@
 <?php
 
+use Models\User;
+use Models\UserPhone;
+use Illuminate\Http\Request;
 use LaravelLegends\EloquentFilter\Filter;
 use LaravelLegends\EloquentFilter\Providers\FilterServiceProvider;
-use Models\User;
 
 class ModelFilterTest extends Orchestra\Testbench\TestCase
 {
@@ -103,5 +105,50 @@ class ModelFilterTest extends Orchestra\Testbench\TestCase
         ];
 
         $this->assertEquals($expected, $modelFilter->getFilterableWithParsedRelations());
+    }
+
+    public function testGetDefaultRequest()
+    {
+        $this->assertInstanceOf(Request::class, (new UserFilter)->getDefaultRequest());
+    }
+
+    public function testToClosure1()
+    {
+
+        // Constructor args
+        
+        $arrayInput['not_equal']['id'] = '3';
+
+        $expected = User::where(function ($query) {
+            $query->where('id', '<>', '3');
+        })->toSql();
+
+        $this->assertEquals(
+            $expected,
+            User::where(CustomFilter::toClosure($arrayInput, [ 'id' => 'not_equal' ]))->toSql()
+        );
+    }
+
+    public function testToClosure()
+    {
+        $arrayInput = [
+            'exact' => [
+                'code' => '31',
+                'number' => '99999999'
+            ]
+        ];
+        
+        $request = request()->replace($arrayInput);
+
+        $this->assertInstanceOf(\Closure::class, UserPhoneFilter::toClosure());
+
+        $expected = UserPhone::where(function ($query) {
+            $query->where('code', '=', '31');
+            $query->where('number', '=', '99999999');
+        })->toSql();
+
+        $this->assertEquals($expected, UserPhone::where(UserPhoneFilter::toClosure())->toSql());
+        $this->assertEquals($expected, UserPhone::where(UserPhoneFilter::toClosure($request))->toSql());
+        $this->assertEquals($expected, UserPhone::where(UserPhoneFilter::toClosure($arrayInput))->toSql());
     }
 }

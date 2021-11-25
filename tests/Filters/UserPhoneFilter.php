@@ -9,8 +9,8 @@ class UserPhoneFilter extends ModelFilter
     public function getFilterable(): array
     {
         return [
+            'code'   => 'exact',
             'number' => 'exact',
-            'user'   => new UserFilter,
         ];
     }
 }

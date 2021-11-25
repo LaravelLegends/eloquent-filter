@@ -2,6 +2,7 @@
 
 namespace LaravelLegends\EloquentFilter;
 
+use Illuminate\Http\Request;
 use Illuminate\Database\Eloquent\Builder;
 use LaravelLegends\EloquentFilter\Contracts\Filterable;
 
@@ -99,6 +100,23 @@ abstract class ModelFilter implements Filterable
      */
     public function apply(Builder $query, $input = null)
     {
-        return $this->getBaseFilter()->apply($query, $input ?? app('request'));
+        return $this->getBaseFilter()->apply($query, $input ?? $this->getDefaultRequest());
+    }
+
+    public static function toClosure($input = null, ...$args): \Closure 
+    {
+        $self = new static(...$args);
+
+        return $self->getBaseFilter()->getCallback($input ?? $self->getDefaultRequest());
+    }
+
+    /**
+     * Get the default request when input argument is not passed
+     *
+     * @return Request
+     */
+    public function getDefaultRequest(): Request
+    {
+        return app('request');
     }
 }
