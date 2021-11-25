@@ -309,12 +309,12 @@ class Filter
      * Sets the rule
      *
      * @param string $name
-     * @param callable|\LaravelLegends\EloquentFilter\Contracts\ApplicableFilter $rule
+     * @param callable|string $rule
      * @throws \UnexpectedValueException on value is not callable or not implements ApplicableFilter interface
      */
     public function setRule(string $name, $rule)
     {
-        if ($rule instanceof ApplicableFilter || is_callable($rule)) {
+        if (is_subclass_of($rule, ApplicableFilter::class) || is_callable($rule)) {
             $this->rules[$name] = $rule;
 
             return $this;

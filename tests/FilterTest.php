@@ -2,6 +2,7 @@
 
 use LaravelLegends\EloquentFilter\Exceptions\RestrictionException;
 use LaravelLegends\EloquentFilter\Filter;
+use LaravelLegends\EloquentFilter\Rules\Exact;
 use Models\User;
 use Models\UserPhone;
 
@@ -313,7 +314,8 @@ class FilterTest extends Orchestra\Testbench\TestCase
     public function testSetRule()
     {
         request()->replace([
-            'between' => ['age' => [18, 65]]
+            'between' => ['age' => [18, 65]],
+            'eq'      => ['id' => 5]
         ]);
 
         $query = User::query();
@@ -321,10 +323,11 @@ class FilterTest extends Orchestra\Testbench\TestCase
         (new Filter)->setRule('between', function ($query, $field, $value) {
             $query->where($field, '>=', $value[0])->where($field, '<=', $value[1]);
         })
+        ->setRule('eq', Exact::class)
         ->apply($query, request());
 
         $expected = User::where(function ($query) {
-            $query->where('age', '>=', 18)->where('age', '<=', 65);
+            $query->where('age', '>=', 18)->where('age', '<=', 65)->where('id', '=', 5);
         })->toSql();
 
         $this->assertEquals($expected, $query->toSql());
