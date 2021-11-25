@@ -1,6 +1,6 @@
 # Eloquent Filter
 
-A useful library to make standards in filters in Eloquent.
+A useful library to make filters for Eloquent.
 A very useful library for creating and standardizing search filters in Laravel Eloquent.
 
 🇧🇷🚀🚀🚀
@@ -16,20 +16,12 @@ Run the follow command
 
 ```composer require laravellegends/eloquent-filter```
 
-## Usage examples:
+## Simple way: Using the `HasFilter` trait
 
-You can use the Eloquent Filter with two ways:
+The `LaravelLegends\EloquentFilter\Concerns\HasFilter` trait can be used in models that will be apply the search filters. 
 
-### Using the `HasFilter` trait
-
-The `LaravelLegends\EloquentFilter\HasFilter` trait can be used in models that will be apply the search filters. 
-This trait provides the `filter` method for model.
- 
-#### Example
-
-Model:
 ```php
-use LaravelLegends\EloquentFilter\HasFilter;
+use LaravelLegends\EloquentFilter\Concerns\HasFilter;
 
 class User extends Model
 {
@@ -37,8 +29,12 @@ class User extends Model
 }
 ```
 
-Controller:
+The `HasFilter` trait provides the `filter` and `withFilter` methods. 
 
+A simple way to use this library in your Laravel application is calling the `filter` method before get results of your model. 
+
+
+Example:
 
 ```php
 class UsersController extends Controller 
@@ -66,15 +62,26 @@ class UsersController extends Controller
 }
 ```
 
-### Using a Filterable class 
+You can show the results when call `/api/users?exact[id]=1`. The sql query `"select * from users where (id = 1)"` will be applied.
 
-Yo can also use the `Filterable` interface to create filters for your Model. You can inherit the ModelFilter class to create a custom filter for a model.
+Note: Show the [rules](#max) session to more information.
 
-Example:
+### Inherit the abstract class ModelFilter 
+
+You can inherit the ModelFilter class to create a custom filter for a model.
+
+For create this class, you should be use the command `php artisan make:filter`, as follow example:
+
+```bash
+$ php artisan make:filter UserFilter
+```
+
+The above command will be generate the follow class:
 
 ```php
 namespace App\Filters;
-use LaravelLegends\EloquentFilter\ModelFilter;
+
+use LaravelLegends\EloquentFilter\Filters\ModelFilter;
 
 class UserFilter extends ModelFilter 
 {
@@ -88,7 +95,7 @@ class UserFilter extends ModelFilter
 }
 ```
 
-In Model
+In Controller
 
 ```php
 use App\Models\User;
@@ -104,13 +111,13 @@ class UsersController extends Controller
 }
 ```
 
-
-Note that in second example, is required to pass a `Request` instance as argument. It is a very useful in cases where you need to use a custom `Request` instance (made by `artisan make:request` command).
+----
 
 ## What does it do?
 
 This library internally apply filters based on query string parameters with special keyworks names.
 
+See all paramaters follow:
 
 ## max
 The maximum value of a column. The url `api/users?max[field]=100` is like a `User::where('field', '<=', 100)`.
@@ -130,7 +137,7 @@ The url `api/users?contains[name]=wallace` is like a `User::where('name', 'LIKE'
 
 ## ends_with
 
-Search a value according to end content of string. Sounds like a `LIKE` with `%$value` value.
+Search a value according to end content of string. Is similar to a `LIKE` with `%$value` value.
 
 ----
 
@@ -258,8 +265,7 @@ The url `api/users?year_exact[created_at]=1998` sounds like a
 User::whereYear('created_at', '=', 1998);
 ```
 
----
-
+----
 
 ## Filtering relationship fields
 
@@ -323,7 +329,7 @@ You can configure the filters for specific fields. You need only to pass an `arr
 To apply restrictions on certain filter that will be filtered, you can set the `$allowedFilters` property with the follow rules:
 
 ```php
-use LaravelLegends\EloquentFilter\HasFilter;
+use LaravelLegends\EloquentFilter\Concerns\HasFilter;
 
 class User extends Model
 {
@@ -336,52 +342,4 @@ class User extends Model
         'profile_id'   => '*',
     ];
 }
-```
-
-... Or with implementation of `Filterable` method:
-
-
-```php
-
-use LaravelLegends\EloquentFilter\HasFilter;
-use LaravelLegends\EloquentFilter\Contracts\Filterable;
-
-class User extends Model implements Filterable
-{
-    use HasFilter;
-
-    public function getFilterable(): array 
-    {
-        return [
-            'name'         => 'contains',
-            'phone.number' => 'contains',
-            'price'        => ['max', 'min'],
-            'profile_id'   => '*',
-        ];
-    }
-}
-```
-
-### Using the allow method
-
-```php
-$alloweds = [
-    'name' => 'contains'
-];
-
-$query = User::query();
-
-(new Filter)->allow($alloweds)->apply($query, $request)
-```
-
-### Using the Filter::fromModel
-
-```php
-$allowed = [
-    'name' => 'contains'
-];
-
-$query = Filter::fromModel(User::class, $request, $allowed);
-
-return $query->paginate();
 ```
