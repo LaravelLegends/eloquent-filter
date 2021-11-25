@@ -1,6 +1,6 @@
 <?php
 
-namespace DummyNamespace\Filters;
+namespace DummyNamespace;
 
 use LaravelLegends\EloquentFilter\ModelFilter;
 
