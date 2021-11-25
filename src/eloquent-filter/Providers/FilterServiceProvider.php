@@ -23,9 +23,9 @@ class FilterServiceProvider extends ServiceProvider
 
         $this->commands(FilterMakeCommand::class);
 
-        Builder::macro('withFilter', function (ModelFilter $modelFilter, $input = null) {
-            $modelFilter->apply($this, $input);
-            return $this;
-        });
+        // Builder::macro('withFilter', function (ModelFilter $modelFilter, $input = null) {
+        //     $modelFilter->apply($this, $input);
+        //     return $this;
+        // });
     }
 }

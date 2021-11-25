@@ -2,6 +2,7 @@
 
 namespace LaravelLegends\EloquentFilter;
 
+use Illuminate\Database\Eloquent\Builder;
 use LaravelLegends\EloquentFilter\Contracts\Filterable;
 use LaravelLegends\EloquentFilter\Filter;
 /**
@@ -15,11 +16,11 @@ trait HasFilter
      * Scope for apply filters from Request
      * 
      * @param \Illuminate\Database\Eloquent\Builder $query
-     * @param Illuminate\Http\Request|array $arrayOrRequest
+     * @param Illuminate\Http\Request|array $input
      * 
      * @return Builder
      */
-    public function scopeFilter($query, $arrayOrRequest = null)
+    public function scopeFilter($query, $input = null)
     {
         $filter = $this->getEloquentFilter();
 
@@ -29,7 +30,7 @@ trait HasFilter
             $filter->allow($this->allowedFilters);
         }
         
-        $filter->apply($query, $arrayOrRequest ?: app('request'))->allowAll();
+        $filter->apply($query, $input ?: app('request'))->allowAll();
         
         return $query;
     }
@@ -42,5 +43,20 @@ trait HasFilter
     public function getEloquentFilter(): Filter
     {
         return app(Filter::class);
+    }
+
+    /**
+     * Applies a filter to current query
+     *
+     * @param Builder $query
+     * @param ModelFilter $filter
+     * @param array|\Illuminate\Http\Request $input
+     * @return void
+     */
+    public function scopeWithFilter(Builder $query, ModelFilter $filter, $input = null)
+    {
+        $filter->apply($query, $input);
+    
+        return $query;
     }
 }

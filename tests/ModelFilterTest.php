@@ -129,7 +129,7 @@ class ModelFilterTest extends Orchestra\Testbench\TestCase
         );
     }
 
-    public function testToClosure()
+    public function testToClosure2()
     {
         $arrayInput = [
             'exact' => [
@@ -150,5 +150,25 @@ class ModelFilterTest extends Orchestra\Testbench\TestCase
         $this->assertEquals($expected, UserPhone::where(UserPhoneFilter::toClosure())->toSql());
         $this->assertEquals($expected, UserPhone::where(UserPhoneFilter::toClosure($request))->toSql());
         $this->assertEquals($expected, UserPhone::where(UserPhoneFilter::toClosure($arrayInput))->toSql());
+    }
+
+    public function testToClosure3()
+    {
+
+        $arrayInput = [
+            'exact' => [
+                'code' => '31',
+                'number' => '99999999'
+            ]
+        ];        
+
+        $request = request()->replace($arrayInput);
+
+        $expected = UserPhone::where('code', '=', '31')->where('number', '=', '99999999')->toSql();
+
+        $this->assertEquals($expected, UserPhone::tap(UserPhoneFilter::toClosure())->toSql());
+        $this->assertEquals($expected, UserPhone::tap(UserPhoneFilter::toClosure($request))->toSql());
+        $this->assertEquals($expected, UserPhone::tap(UserPhoneFilter::toClosure($arrayInput))->toSql());
+        
     }
 }
