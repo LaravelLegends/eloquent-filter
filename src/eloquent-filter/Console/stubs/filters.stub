@@ -1,0 +1,22 @@
+<?php
+
+namespace DummyNamespace\Filters;
+
+use LaravelLegends\EloquentFilter\ModelFilter;
+
+class DummyClass extends ModelFilter
+{
+    /**
+     * The rules of the your filter   
+     *
+     * @return array
+     * @see https://github.com/LaravelLegends/eloquent-filter#max
+    */
+    public function getFilterable(): array
+    {
+        return [
+            // 'id' => 'exact',
+            // 'name' => ['contains', 'ends_with']
+        ];
+    }
+}
