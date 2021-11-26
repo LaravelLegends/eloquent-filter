@@ -97,13 +97,20 @@ abstract class ModelFilter implements Filterable
      *
      * @param Builder $query
      * @param array|Request $input
-     * @return void
+     * @return Filter
      */
-    public function apply(Builder $query, $input = null)
+    public function apply(Builder $query, $input = null): Filter
     {
         return $this->getBaseFilter()->apply($query, $input ?? $this->getDefaultRequest());
     }
 
+    /**
+     * Create Closure to be used in callback 
+     *
+     * @param array|\Illuminate\Http\Request $input
+     * @param mixed ...$args
+     * @return \Closure
+     */
     public static function toClosure($input = null, ...$args): \Closure 
     {
         $self = new static(...$args);
@@ -113,7 +120,7 @@ abstract class ModelFilter implements Filterable
 
     /**
      * Get the default request when input argument is not passed
-     *
+     * 
      * @return Request
      */
     public function getDefaultRequest(): Request

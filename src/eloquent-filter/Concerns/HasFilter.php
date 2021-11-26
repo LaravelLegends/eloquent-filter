@@ -18,8 +18,7 @@ trait HasFilter
      * Scope for apply filters from Request
      * 
      * @param \Illuminate\Database\Eloquent\Builder $query
-     * @param Illuminate\Http\Request|array $input
-     * 
+     * @param \Illuminate\Http\Request|array $input
      * @return Builder
      */
     public function scopeFilter($query, $input = null)
@@ -50,10 +49,10 @@ trait HasFilter
     /**
      * Applies a filter to current query
      *
-     * @param Builder $query
+     * @param \Illuminate\Database\Eloquent\Builder $query
      * @param ModelFilter $filter
      * @param array|\Illuminate\Http\Request $input
-     * @return void
+     * @return \Illuminate\Database\Eloquent\Builder
      */
     public function scopeWithFilter(Builder $query, ModelFilter $filter, $input = null)
     {

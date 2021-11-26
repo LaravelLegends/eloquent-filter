@@ -4,7 +4,11 @@ namespace LaravelLegends\EloquentFilter\Console;
 
 use Illuminate\Console\GeneratorCommand;
 use Symfony\Component\Console\Input\InputArgument;
-
+/**
+ * Command to make Eloquent Filters
+ * 
+ * @author Wallace Vizerra <wallacemaxters@gmail.com>
+ */
 class FilterMakeCommand extends GeneratorCommand
 {
     /**
