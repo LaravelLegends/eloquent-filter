@@ -26,12 +26,12 @@ trait HasFilter
         $filter = $this->getEloquentFilter();
 
         if (method_exists($this, 'getFilterable')) {
-            $filter->allow($this->getFilterable());
+            $filter->setFilterable($this->getFilterable());
         } elseif (property_exists($this, 'filterable')) {
-            $filter->allow($this->filterable);
+            $filter->setFilterable($this->filterable);
         }
         
-        $filter->apply($query, $input ?: app('request'))->allowAll();
+        $filter->apply($query, $input ?: app('request'))->allowAllFilterables();
         
         return $query;
     }

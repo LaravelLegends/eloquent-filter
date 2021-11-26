@@ -83,7 +83,7 @@ abstract class ModelFilter implements Filterable
      */
     public function getBaseFilter(): Filter 
     {
-        $filter = (new Filter)->allow($this->getFilterableWithParsedRelations());
+        $filter = (new Filter)->setFilterable($this->getFilterableWithParsedRelations());
 
         foreach ($this->customRules() as $name => $rule) {
             $filter->setRule($name, $rule);

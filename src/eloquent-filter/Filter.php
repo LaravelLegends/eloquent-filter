@@ -46,7 +46,7 @@ class Filter
     /**
      * @var array
      */
-    protected $allowedFilters = [];
+    protected $filterable = [];
 
     /**
      * @var \Closure|null
@@ -430,7 +430,7 @@ class Filter
     */
     protected function checkAllowedFields(array $filterData): void
     {
-        if (empty($this->allowedFilters)) {
+        if (empty($this->filterable)) {
             return;
         }
 
@@ -450,9 +450,9 @@ class Filter
      */
     protected function checkAllowedFieldByRule(string $field, string $rule)
     {
-        if (!isset($this->allowedFilters[$field])) {
+        if (!isset($this->filterable[$field])) {
             throw new RestrictionException(sprintf('Cannot use filter with "%s" field', $field));
-        } elseif (in_array($this->allowedFilters[$field], ['*', true], true) || in_array($rule, (array) $this->allowedFilters[$field])) {
+        } elseif (in_array($this->filterable[$field], ['*', true], true) || in_array($rule, (array) $this->filterable[$field])) {
             return;
         }
 
@@ -460,14 +460,14 @@ class Filter
     }
 
     /**
-     * Set rules (values) allowed by fields (keys)
+     * Set filterable fields (keys) acording to rules (values)
      *
-     * @param array $allowedFields
+     * @param array $filterable
      * @return self
      */
-    public function allow(array $allowedFilters)
+    public function setFilterable(array $filterable): self
     {
-        $this->allowedFilters = $allowedFilters;
+        $this->filterable = $filterable;
 
         return $this;
     }
@@ -477,9 +477,9 @@ class Filter
      *
      * @return self
      */
-    public function allowAll()
+    public function allowAllFilterables(): self
     {
-        $this->allowedFilters = [];
+        $this->filterable = [];
 
         return $this;
     }
