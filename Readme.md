@@ -16,7 +16,7 @@ Run the follow command
 
 ```composer require laravellegends/eloquent-filter```
 
-## Simple way: Using the `HasFilter` trait
+## Usage guide
 
 The `LaravelLegends\EloquentFilter\Concerns\HasFilter` trait can be used in models that will be apply the search filters. 
 
@@ -66,9 +66,7 @@ You can show the results when call `/api/users?exact[id]=1`. The sql query `"sel
 
 Note: Show the [rules](#max) session to more information.
 
-### Inherit the abstract class ModelFilter 
-
-You can inherit the ModelFilter class to create a custom filter for a model.
+Another way, is using the specific filter for a model. You can inherit the ModelFilter class to create a custom filter for a model.
 
 For create this class, you should be use the command `php artisan make:filter`, as follow example:
 
@@ -104,6 +102,8 @@ use LaravelLegends\EloquentFilter\Filter;
 
 class UsersController extends Controller
 {
+    // api/users?contains[name]=Wallace&exact[id]=2
+
     public function index(Request $request)
     {
         return User::withFilter(new UserFilter, $request)->orderBy('name');
@@ -273,8 +273,10 @@ You can apply the search filters in the relatioship methods defined in your mode
 
 For example:
 
+Model:
+
 ```php
-class User
+class User extends Model
 {
     use HasFilter;
 
@@ -283,12 +285,72 @@ class User
         return $this->hasMany(Phone::class, 'user_id');
     }
 }
+```
 
+Filters:
+
+```php
+class UserFilter extends ModelFilter
+{
+    public function getFilterable(): array
+    {
+        return [
+            'id'            => ['exact', 'not_equal'],
+            'created_at'    => ['year_exact', 'date_max', 'date_min'],
+            'phones.number' => ['contains'],
+            // or
+            'phones'        => new PhoneFilter,
+        ];
+    }
+}
+
+class PhoneFilter extends ModelFilter
+{
+
+    public function getFilterable(): array
+    {
+        return [
+            'number' => 'contains'
+        ];
+    }
+}
+```
+
+```php
+class UserController extends Controller
+{
+    public function index()
+    {
+        return User::withFilter(new UserFilter)->paginate();
+    }
+
+    // Or, apply filter as nested query
+
+    public function index() 
+    {
+        return User::where(UserFilter::toClosure())->paginate();
+    }
+
+    // Or apply in your query dinamically
+
+    public function index()
+    {
+        return User::tap(UserFilter::toClosure())->paginate();
+    }
+}
 ```
 
 In the following example, the user will be filtered for the related phone containing the value `55`.
 
-```api/users?exact[phones.number]=55```
+The ```api/users?exact[phones.number]=55``` is like to:
+
+```php
+User::where(function ($query) {
+    $query->whereHas('phones', function ($query) {
+        $query->where('number', '=', '55');
+    });
+})->paginate();
+```
 
 ## Axios examples
 
@@ -308,38 +370,4 @@ api.get('users', {
         'is_null[name]' : 0
     }
 })
-```
-
-
-## Fields restriction
-
-You can configure the filters for specific fields. You need only to pass an `array` with the follow rules:
-
-```php
-[
-    'name' => 'contains' // Only "contains" for "name" field,
-    'created_at' => ['date_min', 'date_max'] // Allow only two specified filters for the "created_at" field,
-    'phones.number' => true, // Accepts all filter rules for "number" field of "phones()" relationship
-    'profile_id'  => '*' // Accepts all filter rules  for "profile_id" field
-]
-```
-
-### Restricting fields that will be filtered in the model
-
-To apply restrictions on certain filter that will be filtered, you can set the `$allowedFilters` property with the follow rules:
-
-```php
-use LaravelLegends\EloquentFilter\Concerns\HasFilter;
-
-class User extends Model
-{
-    use HasFilter;
-
-    protected $allowedFilters = [
-        'name'         => 'contains',
-        'phone.number' => 'contains',
-        'price'        => ['max', 'min'],
-        'profile_id'   => '*',
-    ];
-}
 ```
