@@ -222,31 +222,6 @@ class FilterTest extends Orchestra\Testbench\TestCase
         $this->assertTrue(count($query->getBindings()) === 0);
     }
 
-    public function testFromModel()
-    {
-        request()->replace([
-            'contains' => ['name' => 'wallace'],
-            'max'      => ['age' => '18'],
-        ]);
-
-        $query = Filter::fromModel(User::class, request());
-
-        $expected = User::where(function ($query) {
-            $query->where('name', 'LIKE', '%wallace%')->where('age', '<=', 18);
-        })->toSql();
-
-        $this->assertEquals(
-            $expected,
-            $query->toSql()
-        );
-
-        $bindings = $query->getBindings();
-
-        $this->assertContains('%wallace%', $bindings);
-        $this->assertContains('18', $bindings);
-    }
-
-
     public function testApplyIn()
     {
         request()->replace([
@@ -681,35 +656,6 @@ class FilterTest extends Orchestra\Testbench\TestCase
         $this->assertEquals($expected, $query->toSql());
         
         $this->assertContains(99, $query->getBindings());
-
-    }
-
-    public function testApplyToModel()
-    {
-        $data = [
-            'min' => ['age' => 18]
-        ];
-
-        $filter = new Filter;
-
-        $actual1 = $filter->applyToModel(User::class, $data)->toSql();
-
-        $expected1 = User::where(function ($query) {
-            $query->where('age', '>=', 18);
-        })->toSql();
-
-        $this->assertEquals($expected1, $actual1);
-
-        $request = request();
-        $request->replace($data + ['exact' => ['email' => 'wallacemaxters@gmail.com']]);
-
-        $expected2 = User::where(function ($query) {
-            $query->where('email', 'wallacemaxters@gmail.com')->where('age', '>=', 18);
-        })->toSql();
-
-        $actual2 = (new Filter)->applyToModel(new User, $request)->toSql();
-
-        $this->assertEquals($expected2, $actual2);
 
     }
 

@@ -19,17 +19,6 @@ class FilterServiceProviderTest extends Orchestra\Testbench\TestCase
         $this->assertEquals($min, \LaravelLegends\EloquentFilter\Rules\Min::class);
     }
 
-    public function testApplyToModel()
-    {
-        $query = \LaravelLegends\EloquentFilter\Facades\Filter::applyToModel(User::class, [
-            'exact' => ['name' => 'Wallace']
-        ]);
-
-        $expected = User::where(['name' => 'Wallace'])->toSql();
-
-        $this->assertEquals($expected, $query->toSql());
-    }
-
     protected function getPackageProviders($app)
     {
         return [FilterServiceProvider::class];

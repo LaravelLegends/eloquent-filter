@@ -235,11 +235,12 @@ class Filter
      *
      * @return self
      */
-    public function applyRule($query, string $name, array $fields)
+    public function applyRule($query, string $name, array $fields): self
     {
         $rule = $this->getRuleAsCallable($name);
 
         foreach ($fields as $field => $value) {
+
             if ($this->isEmpty($value)) {
                 continue;
             }
@@ -481,58 +482,5 @@ class Filter
         $this->allowedFilters = [];
 
         return $this;
-    }
-
-    /**
-     * Apply filter to Model instance or class
-     *
-     * @param string|\Illuminate\Database\Eloquent\Model $model
-     * @param array|\Illuminate\Http\Request $arrayOrRequest
-     * @return \Illuminate\Database\Eloquent\Builder
-     */
-    public function applyToModel($model, $arrayOrRequest = null)
-    {
-        $clone = clone $this;
-        
-        if (! is_subclass_of($model, Model::class)) {
-            throw new \InvalidArgumentException('Only models can be passed by parameter');
-        }
-        
-        if (is_subclass_of($model, Filterable::class)) {
-            $instance = is_object($model) ? $model : new $model;
-
-            $query = $instance->newQuery();
-
-            $clone->allow($instance->getFilterable());
-        } else {
-            $query = $model::query();
-        }
-
-        $clone->apply($query, $arrayOrRequest ?? app('request'));
-
-        return $query;
-    }
-
-    /**
-     * Apply filter directly in model
-     *
-     * @param string Model class
-     * @param \Illuminate\Http\Request $request
-     * @param array|null $allowedFilters
-     * @return \Illuminate\Database\Eloquent\Builder
-     */
-    public static function fromModel($model, Request $request, array $allowedFilters = [])
-    {
-        if (! is_subclass_of($model, Model::class)) {
-            throw new \InvalidArgumentException('Only models can be passed by parameter');
-        }
-
-        $filter = new static;
-
-        $allowedFilters && $filter->allow($allowedFilters);
-
-        $filter->apply($query = $model::query(), $request);
-
-        return $query;
     }
 }
