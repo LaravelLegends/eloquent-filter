@@ -188,7 +188,11 @@ class FilterTest extends Orchestra\Testbench\TestCase
     public function testApplyHas()
     {
         request()->replace([
-            'has' => ['phones' => '1', 'documents' => '0']
+            'has' => [
+                'phones'    => '0', 
+                'documents' => '1',
+                'documents.type' => '1',
+            ]
         ]);
 
         $query = User::query();
@@ -196,7 +200,7 @@ class FilterTest extends Orchestra\Testbench\TestCase
         (new Filter())->apply($query, request());
 
         $expected_sql = User::where(static function ($query) {
-            $query->has('phones')->doesntHave('documents');
+            $query->doesntHave('phones')->has('documents')->has('documents.type');
         })->toSql();
 
         $this->assertEquals($query->toSql(), $expected_sql);
