@@ -69,7 +69,7 @@ abstract class ModelFilter implements Filterable
             });
         }
 
-        $keys = array_map(static function (string $key) use($prefix) {
+        $keys = array_map(static function (string $key) use ($prefix) {
             return $prefix . Filter::RELATION_SEPARATOR . $key;
         }, array_keys($data));
 

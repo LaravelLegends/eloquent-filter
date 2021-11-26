@@ -5,10 +5,8 @@ namespace LaravelLegends\EloquentFilter;
 use Illuminate\Http\Request;
 use LaravelLegends\EloquentFilter\Rules;
 use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\Model;
 use LaravelLegends\EloquentFilter\Exceptions\RestrictionException;
 use LaravelLegends\EloquentFilter\Contracts\ApplicableFilter;
-use LaravelLegends\EloquentFilter\Contracts\Filterable;
 use LaravelLegends\EloquentFilter\Contracts\RelationFilter;
 
 /**
