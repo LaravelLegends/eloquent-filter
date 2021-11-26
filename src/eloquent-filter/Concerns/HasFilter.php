@@ -3,7 +3,6 @@
 namespace LaravelLegends\EloquentFilter\Concerns;
 
 use Illuminate\Database\Eloquent\Builder;
-use LaravelLegends\EloquentFilter\Contracts\Filterable;
 use LaravelLegends\EloquentFilter\Filter;
 use LaravelLegends\EloquentFilter\Filters\ModelFilter;
 
@@ -17,6 +16,7 @@ trait HasFilter
     /**
      * Scope for apply filters from Request
      * 
+     * @deprecated 
      * @param \Illuminate\Database\Eloquent\Builder $query
      * @param \Illuminate\Http\Request|array $input
      * @return Builder
@@ -25,10 +25,10 @@ trait HasFilter
     {
         $filter = $this->getEloquentFilter();
 
-        if ($this instanceof Filterable) {
+        if (method_exists($this, 'getFilterable')) {
             $filter->allow($this->getFilterable());
-        } elseif (property_exists($this, 'allowedFilters')) {
-            $filter->allow($this->allowedFilters);
+        } elseif (property_exists($this, 'filterable')) {
+            $filter->allow($this->filterable);
         }
         
         $filter->apply($query, $input ?: app('request'))->allowAll();

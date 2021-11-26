@@ -4,28 +4,20 @@ namespace Models;
 
 use Illuminate\Database\Eloquent\Model;
 use LaravelLegends\EloquentFilter\Concerns\HasFilter;
-use LaravelLegends\EloquentFilter\Contracts\Filterable;
-class User extends Model implements Filterable
+class User extends Model
 {
     use HasFilter;
-    
 
     protected $table = 'users';
 
-    public $allowedFilters = [
+    public $filterable = [
         'name'           => 'contains',
         'email'          => true,
         'age'            => ['max', 'min'],
         'roles.id'       => ['exact', 'not_equal'],
         'roles.name'     => ['in', 'not_in'],
-        'roles.disabled' => '*'
-        
+        'roles.disabled' => '*'  
     ];
-
-    public function getFilterable(): array
-    {
-        return $this->allowedFilters;
-    }
 
     public function phones()
     {

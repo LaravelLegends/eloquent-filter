@@ -4,9 +4,7 @@ namespace Models;
 
 use Illuminate\Database\Eloquent\Model;
 use LaravelLegends\EloquentFilter\Concerns\HasFilter;
-use LaravelLegends\EloquentFilter\Contracts\Filterable;
-
-class Role extends Model implements Filterable
+class Role extends Model
 {
     use HasFilter;
 
