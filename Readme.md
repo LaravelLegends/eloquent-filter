@@ -1,7 +1,8 @@
 # Eloquent Filter
 
 A useful library to make filters for Eloquent.
-A very useful library for creating and standardizing search filters in Laravel Eloquent.
+
+This library is useful to create search filters in your Rest API using the Eloquent.
 
 🇧🇷🚀🚀🚀
 
