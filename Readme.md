@@ -8,13 +8,14 @@ A very useful library for creating and standardizing search filters in Laravel E
 
 ## Description
 
-This library is helpful to create standard to search filters for Laravel. The idea is aggregate many filters simply passing the values in your requests. Furthermore, this library helps you to avoid write or rewrite many lines of code for create search on your requests.
+The Eloquent Filter library can be used to create patterns for search criterias on models in your Laravel Project. The idea is aggregate filters simply passing the values in your request payload.
 
 ## Instalation
 
-Run the follow command 
+For instalation, you should be use Composer. Run the follow command: 
 
 ```composer require laravellegends/eloquent-filter```
+
 
 ## Usage guide
 
@@ -86,8 +87,8 @@ class UserFilter extends ModelFilter
     public function getFilterables(): array
     {
         return [
-            'id' => 'exact',
-            'name' => ['contains', 'starts_with'],
+            'role_id' => 'not_equal', // or ['not_equal']
+            'name'    => ['contains', 'starts_with'],
         ];
     }
 }
@@ -102,13 +103,27 @@ use LaravelLegends\EloquentFilter\Filter;
 
 class UsersController extends Controller
 {
-    // api/users?contains[name]=Wallace&exact[id]=2
+    // api/users?starts_with[name]=Wallace&not_equal[role_id]=2
 
     public function index(Request $request)
     {
-        return User::withFilter(new UserFilter, $request)->orderBy('name');
+        return User::withFilter(new UserFilter, $request)
+                    ->orderBy('name')
+                    ->get();
     }
 }
+```
+
+The above code internally will be called as follow example:
+
+```php
+
+User::where(function ($query) {
+    $query->where('name', 'LIKE', 'Wallace%');
+    $query->where('role_id', '<>', '2');
+})
+->orderBy('name')
+->get();
 ```
 
 ----
@@ -321,6 +336,10 @@ class UserController extends Controller
 {
     public function index()
     {
+        // api/users?not_in[role_id][]=1&not_in[role_id][]=3
+        
+        // select * from users where (role_id NOT IN (1, 3))
+
         return User::withFilter(new UserFilter)->paginate();
     }
 
@@ -328,13 +347,23 @@ class UserController extends Controller
 
     public function index() 
     {
+
+        // api/users?exact[role_id]=1
+        
+        // select * from users where (role_id = 1)
+
         return User::where(UserFilter::toClosure())->paginate();
     }
 
-    // Or apply in your query dinamically
+    // Or apply in your query as base condition
 
     public function index()
     {
+        
+        // api/users?exact[role_id]=1
+        
+        // select * from users where role_id = 1
+
         return User::tap(UserFilter::toClosure())->paginate();
     }
 }
