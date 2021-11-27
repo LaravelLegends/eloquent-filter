@@ -132,7 +132,6 @@ class Filter
      */
     public function getCallbackFromArray(array $data): \Closure
     {
-
         $this->checkAllowedFields($data);
 
         [$baseFilters, $relatedFilters] = $this->getGroupedFiltersByRules($data);
