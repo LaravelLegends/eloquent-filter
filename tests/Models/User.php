@@ -10,7 +10,7 @@ class User extends Model
 
     protected $table = 'users';
 
-    public $filterable = [
+    protected $filterables = [
         'name'           => 'contains',
         'email'          => true,
         'age'            => ['max', 'min'],
