@@ -137,6 +137,8 @@ class Filter
      */
     public function getCallbackFromArray(array $data): \Closure
     {
+        $this->checkAllowedFields($data);
+
         [$baseFilters, $relatedFilters] = $this->getGroupedFiltersByRules($data);
 
         return function ($query) use ($baseFilters, $relatedFilters) {
@@ -181,11 +183,7 @@ class Filter
      */
     public function getPreparedDataFromRequest(Request $request): array
     {
-        $requestData = $this->prepareRequestData($request);
-
-        $this->checkAllowedFields($requestData);
-
-        return $requestData;
+        return $this->prepareRequestData($request);
     }
 
     /**

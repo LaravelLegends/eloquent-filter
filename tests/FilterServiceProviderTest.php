@@ -22,10 +22,10 @@ class FilterServiceProviderTest extends Orchestra\Testbench\TestCase
     public function testApplyToModel()
     {
         $query = \LaravelLegends\EloquentFilter\Facades\Filter::applyToModel(User::class, [
-            'exact' => ['name' => 'Wallace']
+            'exact' => ['id' => '23']
         ]);
 
-        $expected = User::where(['name' => 'Wallace'])->toSql();
+        $expected = User::where(['id' => '23'])->toSql();
 
         $this->assertEquals($expected, $query->toSql());
     }
