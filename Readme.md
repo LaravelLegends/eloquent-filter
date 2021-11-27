@@ -83,7 +83,7 @@ use LaravelLegends\EloquentFilter\Filters\ModelFilter;
 
 class UserFilter extends ModelFilter 
 {
-    public function getFilterable(): array
+    public function getFilterables(): array
     {
         return [
             'id' => 'exact',
@@ -292,7 +292,7 @@ Filters:
 ```php
 class UserFilter extends ModelFilter
 {
-    public function getFilterable(): array
+    public function getFilterables(): array
     {
         return [
             'id'            => ['exact', 'not_equal'],
@@ -307,7 +307,7 @@ class UserFilter extends ModelFilter
 class PhoneFilter extends ModelFilter
 {
 
-    public function getFilterable(): array
+    public function getFilterables(): array
     {
         return [
             'number' => 'contains'

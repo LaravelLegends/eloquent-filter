@@ -15,7 +15,7 @@ class BaseFilter extends ModelFilter
      *
      * @var array
      */
-    protected $filterable = [];
+    protected $filterables = [];
 
     /**
      * Custom rules
@@ -30,9 +30,9 @@ class BaseFilter extends ModelFilter
      * @param array $filterable
      * @param array $customRules
      */
-    public function __construct(array $filterable, array $customRules = [])
+    public function __construct(array $filterables, array $customRules = [])
     {
-        $this->filterable = $filterable;    
+        $this->filterables = $filterables;    
         $this->customRules = $customRules;
     }
 
@@ -41,9 +41,9 @@ class BaseFilter extends ModelFilter
      *
      * @return array
      */
-    public function getFilterable(): array
+    public function getFilterables(): array
     {
-        return $this->filterable;
+        return $this->filterables;
     }
 
     /**

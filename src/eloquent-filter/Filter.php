@@ -44,7 +44,7 @@ class Filter
     /**
      * @var array
      */
-    protected $filterable = [];
+    protected $filterables = [];
 
     /**
      * @var \Closure|null
@@ -132,6 +132,9 @@ class Filter
      */
     public function getCallbackFromArray(array $data): \Closure
     {
+
+        $this->checkAllowedFields($data);
+
         [$baseFilters, $relatedFilters] = $this->getGroupedFiltersByRules($data);
 
         return function ($query) use ($baseFilters, $relatedFilters) {
@@ -176,11 +179,7 @@ class Filter
      */
     public function getPreparedDataFromRequest(Request $request): array
     {
-        $requestData = $this->prepareRequestData($request);
-
-        $this->checkAllowedFields($requestData);
-
-        return $requestData;
+        return $this->prepareRequestData($request);
     }
 
     /**
@@ -428,7 +427,7 @@ class Filter
     */
     protected function checkAllowedFields(array $filterData): void
     {
-        if (empty($this->filterable)) {
+        if (empty($this->filterables)) {
             return;
         }
 
@@ -448,9 +447,9 @@ class Filter
      */
     protected function checkAllowedFieldByRule(string $field, string $rule)
     {
-        if (!isset($this->filterable[$field])) {
+        if (!isset($this->filterables[$field])) {
             throw new RestrictionException(sprintf('Cannot use filter with "%s" field', $field));
-        } elseif (in_array($this->filterable[$field], ['*', true], true) || in_array($rule, (array) $this->filterable[$field])) {
+        } elseif (in_array($this->filterables[$field], ['*', true], true) || in_array($rule, (array) $this->filterables[$field])) {
             return;
         }
 
@@ -463,22 +462,21 @@ class Filter
      * @param array $filterable
      * @return self
      */
-    public function setFilterable(array $filterable): self
+    public function setFilterables(array $filterables): self
     {
-        $this->filterable = $filterable;
+        $this->filterables = $filterables;
 
         return $this;
     }
 
+
     /**
-     * Remove filter restrictions
+     * Clear all filterable definitions
      *
      * @return self
      */
-    public function allowAllFilterables(): self
+    public function clearFilterables(): self
     {
-        $this->filterable = [];
-
-        return $this;
+        return $this->setFilterables([]);
     }
 }

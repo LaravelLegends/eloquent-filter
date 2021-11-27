@@ -63,14 +63,14 @@ class ModelFilterTest extends Orchestra\Testbench\TestCase
         );
     }
 
-    public function testModelGetFilterable()
+    public function testModelGetFilterables()
     {
         $modelFilter = new BaseFilter([
             'id' => 'exact'
         ]);
 
-        $this->assertEquals(['id' => 'exact'], $modelFilter->getFilterable());
-        $this->assertIsArray($modelFilter->getFilterable());
+        $this->assertEquals(['id' => 'exact'], $modelFilter->getFilterables());
+        $this->assertIsArray($modelFilter->getFilterables());
     }
 
     public function testModelGetFilterableWithParsedRelated()

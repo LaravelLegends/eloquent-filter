@@ -3,6 +3,7 @@
 use LaravelLegends\EloquentFilter\Exceptions\RestrictionException;
 use LaravelLegends\EloquentFilter\Filter;
 use LaravelLegends\EloquentFilter\Rules\Exact;
+use Models\Role;
 use Models\User;
 use Models\UserPhone;
 
@@ -96,7 +97,6 @@ class FilterTest extends Orchestra\Testbench\TestCase
             $query->whereHas('phones', function ($query) {
                 $query->where('number', '=', '3199999999');
             });
-            
         })->toSql();
 
         $this->assertEquals(
@@ -189,7 +189,7 @@ class FilterTest extends Orchestra\Testbench\TestCase
     {
         request()->replace([
             'has' => [
-                'phones'    => '0', 
+                'phones'    => '0',
                 'documents' => '1',
                 'documents.type' => '1',
             ]
@@ -375,9 +375,9 @@ class FilterTest extends Orchestra\Testbench\TestCase
 
     public function testNotEqual()
     {
-       $request = request();
+        $request = request();
        
-       $request->replace(['not_equal' => ['profile_id' => '3']]);
+        $request->replace(['not_equal' => ['profile_id' => '3']]);
 
         (new Filter)->apply($query = User::query(), $request);
 
@@ -468,8 +468,23 @@ class FilterTest extends Orchestra\Testbench\TestCase
         $this->assertEquals($expected, $query->toSql());
     }
 
+    public function testTraitHasFilter2()
+    {
+        $input = ['contains' => ['name' => 'Wallace'], 'not_equal' => ['id' => '55']];
 
-    public function testSetFilterable()
+        $request = request()->replace($input);
+
+        $expected = Role::where(function ($query) {
+            $query->where('name', 'LIKE', '%Wallace%');
+            $query->where('id', '<>', '55');
+        })->toSql();
+
+        $this->assertEquals($expected, Role::filter($input)->toSql());
+        $this->assertEquals($expected, Role::filter($request)->toSql());
+    }
+
+
+    public function testSetFilterables()
     {
 
         // api/users?contains[name]=Wallace
@@ -500,7 +515,7 @@ class FilterTest extends Orchestra\Testbench\TestCase
             'max' => ['name' => 'Wallace'],
         ]);
 
-        $filter = (new Filter)->setFilterable(['name' => ['contains']]);
+        $filter = (new Filter)->setFilterables(['name' => ['contains']]);
 
         try {
             $filter->apply(User::query(), request());
@@ -508,7 +523,7 @@ class FilterTest extends Orchestra\Testbench\TestCase
             $this->assertEquals($e->getMessage(), 'Cannot use filter "name" field with rule "max"');
         }
 
-        $filter->allowAllFilterables()->apply(User::query(), request());
+        $filter->clearFilterables()->apply(User::query(), request());
         // no exception
     }
 
@@ -530,7 +545,7 @@ class FilterTest extends Orchestra\Testbench\TestCase
                 $query->where('number', 'LIKE', '%4321%')->where('ddd', 'LIKE', '%32%');
             });
 
-            // exact 
+            // exact
             $query->whereHas('phones', static function ($query) {
                 $query->where('country', '=', 55);
             });
@@ -539,7 +554,6 @@ class FilterTest extends Orchestra\Testbench\TestCase
             $query->whereDoesntHave('roles', function ($query) {
                 $query->where('id', '=', 2);
             });
-            
         })->toSql();
 
         (new Filter)->apply($query = User::query(), $request);
@@ -592,20 +606,17 @@ class FilterTest extends Orchestra\Testbench\TestCase
         ]);
 
         $expected = User::where(function ($query) {
-
             $query->where('name', 'LIKE', '%Wallace%');
 
             $query->whereHas('phones', function ($query) {
                 $query->where('country', 31);
             });
-
         })->toSql();
 
         $this->assertEquals($expected, $query->toSql());
 
         $this->assertContains('%Wallace%', $query->getBindings());
         $this->assertContains(31, $query->getBindings());
-
     }
 
     public function testGetCallbackFromArray()
@@ -621,14 +632,12 @@ class FilterTest extends Orchestra\Testbench\TestCase
         ]);
 
         $expected = User::where(function ($query) {
-
             $query->where('age', '=', 99);
             $query->where('last_name', 'LIKE', 'Vizerra%');
 
             $query->whereHas('phones', function ($query) {
                 $query->where('country_code', 55);
             });
-
         })->toSql();
 
         $query = User::where($callback);
@@ -638,7 +647,6 @@ class FilterTest extends Orchestra\Testbench\TestCase
         $this->assertContains('Vizerra%', $query->getBindings());
         $this->assertContains(55, $query->getBindings());
         $this->assertContains(99, $query->getBindings());
-
     }
 
     public function testGetCallbackFromRequest()
@@ -660,7 +668,6 @@ class FilterTest extends Orchestra\Testbench\TestCase
         $this->assertEquals($expected, $query->toSql());
         
         $this->assertContains(99, $query->getBindings());
-
     }
 
     public function testRelationFilterMethods()

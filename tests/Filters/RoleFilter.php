@@ -7,7 +7,7 @@ use LaravelLegends\EloquentFilter\Filters\ModelFilter;
 class RoleFilter extends ModelFilter
 {
 
-    public function getFilterable(): array
+    public function getFilterables(): array
     {
         return [
             'id'    => 'exact',

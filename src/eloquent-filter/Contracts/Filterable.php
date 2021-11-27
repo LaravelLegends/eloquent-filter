@@ -4,5 +4,5 @@ namespace LaravelLegends\EloquentFilter\Contracts;
 
 interface Filterable
 {
-    public function getFilterable(): array;
+    public function getFilterables(): array;
 }

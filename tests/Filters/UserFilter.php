@@ -19,7 +19,7 @@ class UserFilter extends ModelFilter
         ];
     }
 
-    public function getFilterable(): array
+    public function getFilterables(): array
     {
         return [
             'id'   => 'eq',

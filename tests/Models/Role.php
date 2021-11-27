@@ -8,11 +8,11 @@ class Role extends Model
 {
     use HasFilter;
 
-    public function getFilterable(): array
+    public function getFilterables(): array
     {
         return [
             'name' => '*',
-            'id'   => 'exact'
+            'id'   => ['exact', 'not_equal']
         ];
     }
 

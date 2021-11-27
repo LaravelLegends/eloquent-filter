@@ -8,7 +8,7 @@ use LaravelLegends\EloquentFilter\Rules\Exact;
 
 class UserPhoneFilter extends ModelFilter
 {
-    public function getFilterable(): array
+    public function getFilterables(): array
     {
         return [
             'code'   => 'exact',

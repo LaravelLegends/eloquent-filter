@@ -12,7 +12,7 @@ class DummyClass extends ModelFilter
      * @return array
      * @see https://github.com/LaravelLegends/eloquent-filter#max
     */
-    public function getFilterable(): array
+    public function getFilterables(): array
     {
         return [
             // 'id' => 'exact',

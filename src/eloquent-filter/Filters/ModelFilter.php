@@ -35,7 +35,7 @@ abstract class ModelFilter implements Filterable
     {
         $result = [];
 
-        foreach ($this->getFilterable() as $field => $rule) {
+        foreach ($this->getFilterables() as $field => $rule) {
 
             if ($rule instanceof Filterable) {
 
@@ -61,15 +61,15 @@ abstract class ModelFilter implements Filterable
      */
     public static function toRelatedFilterable(Filterable $filter, string $prefix, bool $allowChildFilters = false): array
     {
-        $data = $filter->getFilterable();
+        $data = $filter->getFilterables();
 
         if ($allowChildFilters === false) {
-            $data = array_filter($data, function ($item) {
+            $data = array_filter($data, static function ($item): bool {
                 return !$item instanceof self;
             });
         }
 
-        $keys = array_map(static function (string $key) use ($prefix) {
+        $keys = array_map(static function (string $key) use ($prefix): string {
             return $prefix . Filter::RELATION_SEPARATOR . $key;
         }, array_keys($data));
 
@@ -83,7 +83,7 @@ abstract class ModelFilter implements Filterable
      */
     public function getBaseFilter(): Filter 
     {
-        $filter = (new Filter)->setFilterable($this->getFilterableWithParsedRelations());
+        $filter = (new Filter)->setFilterables($this->getFilterableWithParsedRelations());
 
         foreach ($this->customRules() as $name => $rule) {
             $filter->setRule($name, $rule);

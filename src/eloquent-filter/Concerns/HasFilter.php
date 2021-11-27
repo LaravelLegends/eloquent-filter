@@ -25,13 +25,13 @@ trait HasFilter
     {
         $filter = $this->getEloquentFilter();
 
-        if (method_exists($this, 'getFilterable')) {
-            $filter->setFilterable($this->getFilterable());
-        } elseif (property_exists($this, 'filterable')) {
-            $filter->setFilterable($this->filterable);
+        if (method_exists($this, 'getFilterables')) {
+            $filter->setFilterables($this->getFilterables());
+        } elseif (property_exists($this, 'filterables')) {
+            $filter->setFilterables($this->filterables);
         }
         
-        $filter->apply($query, $input ?: app('request'))->allowAllFilterables();
+        $filter->apply($query, $input ?: app('request'))->clearFilterables();
         
         return $query;
     }
