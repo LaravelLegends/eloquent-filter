@@ -4,8 +4,8 @@ namespace LaravelLegends\EloquentFilter\Filters;
 
 use Illuminate\Http\Request;
 use Illuminate\Database\Eloquent\Builder;
-use LaravelLegends\EloquentFilter\Contracts\Filterable;
 use LaravelLegends\EloquentFilter\Filter;
+use LaravelLegends\EloquentFilter\Contracts\Filterable;
 
 /**
  * This a abstract class that should be extended to represent a model filter

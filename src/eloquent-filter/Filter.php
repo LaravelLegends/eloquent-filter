@@ -5,9 +5,9 @@ namespace LaravelLegends\EloquentFilter;
 use Illuminate\Http\Request;
 use LaravelLegends\EloquentFilter\Rules;
 use Illuminate\Database\Eloquent\Builder;
-use LaravelLegends\EloquentFilter\Exceptions\RestrictionException;
-use LaravelLegends\EloquentFilter\Contracts\ApplicableFilter;
 use LaravelLegends\EloquentFilter\Contracts\RelationFilter;
+use LaravelLegends\EloquentFilter\Contracts\ApplicableFilter;
+use LaravelLegends\EloquentFilter\Exceptions\RestrictionException;
 
 /**
  * This class create easy filters for Eloquent model basead defined rules using an Array or Request data 
