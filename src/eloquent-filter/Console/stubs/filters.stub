@@ -2,21 +2,20 @@
 
 namespace DummyNamespace;
 
-use LaravelLegends\EloquentFilter\ModelFilter;
+use LaravelLegends\EloquentFilter\Filters\ModelFilter;
 
 class DummyClass extends ModelFilter
 {
     /**
-     * The rules of the your filter   
-     *
+     * The rules of filter
+     * 
+     * @see https://github.com/LaravelLegends/eloquent-filter#what-does-it-do
      * @return array
-     * @see https://github.com/LaravelLegends/eloquent-filter#max
     */
     public function getFilterables(): array
     {
         return [
-            // 'id' => 'exact',
-            // 'name' => ['contains', 'ends_with']
+            'id' => ['exact', 'not_exact'],
         ];
     }
 }
