@@ -19,7 +19,7 @@ trait HasFilter
      * @deprecated 
      * @param \Illuminate\Database\Eloquent\Builder $query
      * @param \Illuminate\Http\Request|array $input
-     * @return Builder
+     * @return \Illuminate\Database\Eloquent\Builder
      */
     public function scopeFilter($query, $input = null)
     {
