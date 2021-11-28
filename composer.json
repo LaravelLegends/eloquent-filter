@@ -25,7 +25,7 @@
      "extra": {
         "laravel": {
             "providers": [
-                "LaravelLegends\\EloquentFilters\\Providers\\FilterServiceProvider"
+                "LaravelLegends\\EloquentFilter\\Providers\\FilterServiceProvider"
             ]
         }
     }
