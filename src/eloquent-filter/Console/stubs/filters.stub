@@ -15,7 +15,7 @@ class DummyClass extends ModelFilter
     public function getFilterables(): array
     {
         return [
-            'id' => ['exact', 'not_exact'],
+            'id' => ['exact', 'not_equal'],
         ];
     }
 }
