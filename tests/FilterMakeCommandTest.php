@@ -3,6 +3,7 @@
 use Illuminate\Console\Command;
 use LaravelLegends\EloquentFilter\Console\FilterMakeCommand;
 use LaravelLegends\EloquentFilter\Providers\FilterServiceProvider;
+use Models\User;
 
 class FilterMakeCommandTest extends Orchestra\Testbench\TestCase
 {
@@ -23,9 +24,11 @@ class FilterMakeCommandTest extends Orchestra\Testbench\TestCase
 
     public function testConsoleCommand()
     {
+        $filter = 'Name' . uniqid() . 'Filter';
+
         $command = $this->artisan(
             'make:filter',
-            ['name' => 'UserFilter', '--force']
+            ['name' => $filter, '-m' => User::class]
         );
 
         $command->assertExitCode(0);

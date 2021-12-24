@@ -19,6 +19,14 @@ class User extends Model
         'roles.disabled' => '*'  
     ];
 
+    protected $fillable = [
+        'name', 'email', 'age',
+    ];
+
+    protected $casts = [
+        'age'      => 'int'
+    ];
+
     public function phones()
     {
         return $this->hasMany(UserPhone::class);
