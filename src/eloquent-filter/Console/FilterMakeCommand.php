@@ -16,8 +16,8 @@ class FilterMakeCommand extends GeneratorCommand
 {
     const FIELDS_BY_TYPE = [
         'datetime' => ['date_max', 'date_min', 'year_max', 'year_min', 'year_exact'],
-        'int'      => ['exact', 'min', 'max'],
-        'key'      => ['exact', 'not_exact'],
+        'int'      => ['exact', 'min', 'max', 'not_equal'],
+        'key'      => ['exact', 'not_equal'],
         'string'   => ['contains', 'starts_with', 'ends_with'],
     ];
 
