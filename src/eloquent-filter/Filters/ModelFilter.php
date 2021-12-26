@@ -9,13 +9,12 @@ use LaravelLegends\EloquentFilter\Contracts\Filterable;
 
 /**
  * This a abstract class that should be extended to represent a model filter
- * 
+ *
  * @author Wallace Vizerra <wallacemaxters@gmail.com>
  */
 
 abstract class ModelFilter implements Filterable
 {
-
     /**
      * Define costum rules for current Filterable. The array should be return a ApplicableFilter class or Closure
      *
@@ -28,7 +27,7 @@ abstract class ModelFilter implements Filterable
 
     /**
      * Gets the all filterabled data including Filterable instances as prefixed key
-     * 
+     *
      * @return array
      */
     public function getFilterableWithParsedRelations(): array
@@ -36,23 +35,20 @@ abstract class ModelFilter implements Filterable
         $result = [];
 
         foreach ($this->getFilterables() as $field => $rule) {
-
             if ($rule instanceof Filterable) {
-
                 $result += static::toRelatedFilterable($rule, $field, false);
 
                 continue;
             }
 
             $result[$field] = $rule;
-
         }
 
         return $result;
     }
 
     /**
-     * Prefix all keys of a Filterable. Is useful to parse Filterable on return of getFilterable 
+     * Prefix all keys of a Filterable. Is useful to parse Filterable on return of getFilterable
      *
      * @param Filterable $filter
      * @param string $prefix
@@ -77,11 +73,11 @@ abstract class ModelFilter implements Filterable
     }
 
     /**
-     * Constructs the base filter based on Filterable 
+     * Constructs the base filter based on Filterable
      *
      * @return Filter
      */
-    public function getBaseFilter(): Filter 
+    public function getBaseFilter(): Filter
     {
         $filter = (new Filter)->setFilterables($this->getFilterableWithParsedRelations());
 
@@ -105,13 +101,13 @@ abstract class ModelFilter implements Filterable
     }
 
     /**
-     * Create Closure to be used in callback 
+     * Create Closure to be used in callback
      *
      * @param array|\Illuminate\Http\Request $input
      * @param mixed ...$args
      * @return \Closure
      */
-    public static function toClosure($input = null, ...$args): \Closure 
+    public static function toClosure($input = null, ...$args): \Closure
     {
         $self = new static(...$args);
 
@@ -120,7 +116,7 @@ abstract class ModelFilter implements Filterable
 
     /**
      * Get the default request when input argument is not passed
-     * 
+     *
      * @return Request
      */
     public function getDefaultRequest(): Request
