@@ -192,7 +192,15 @@ class Filter
         $rule_keys = array_keys($this->rules);
 
         if (null === $this->dataCallback) {
-            return array_filter($request->only($rule_keys));
+            $rules = [];
+
+            foreach ($request->only($rule_keys) as $key => $value) {
+                $rules[$key] = array_filter($value, function ($item) {
+                    return !($item === null || $item === '');
+                });
+            }
+
+            return $rules;
         }
 
         $rules = [];
@@ -340,6 +348,10 @@ class Filter
     {
         return $value === '' || $value === [];
     }
+
+    /**
+     * 
+     */
 
     /**
      * Get parsed data if field contains a expession than represents a relationship

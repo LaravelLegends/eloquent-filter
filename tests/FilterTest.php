@@ -48,7 +48,8 @@ class FilterTest extends Orchestra\Testbench\TestCase
     public function testApplyMin()
     {
         request()->replace([
-            'min' => ['likes' => '500']
+            'min' => ['likes' => '500'],
+            'exact' => ['f' => null]
         ]);
 
         (new Filter)->apply($query = User::query(), request());
