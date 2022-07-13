@@ -195,7 +195,7 @@ class Filter
             $rules = [];
 
             foreach ($request->only($rule_keys) as $key => $value) {
-                $rules[$key] = array_filter($value, function ($item) {
+                $rules[$key] = array_filter((array) $value, function ($item) {
                     return !($item === null || $item === '');
                 });
             }
