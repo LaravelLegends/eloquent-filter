@@ -1,4 +1,4 @@
-# Eloquent Filter
+# Laravel Legends Eloquent Filter
 
 A useful library to make filters for Eloquent.
 
