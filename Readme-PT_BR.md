@@ -86,10 +86,31 @@ class UsersController extends Controller
 
     public function index(Request $request)
     {
-        $query = User::orderBy('name');
+        $query = User::query();
 
-        (new Filter)->apply($query, $request);
-
+        $filter = new Filter;
+        $filter->apply($query, $request);
+    
+        // Check if `order_by` parameter is present
+        if ($request->has('order_by')) {
+            $orderBy = $request->input('order_by');
+    
+            if (is_array($orderBy)) {
+                // Multi-ordering with array of columns and directions
+                foreach ($orderBy as $order) {
+                    $column = $order['column'];
+                    $direction = $order['direction'] ?? 'asc';
+    
+                    $query->orderBy($column, $direction);
+                }
+            } else {
+                // Single-ordering with a single column
+                $query->orderBy($orderBy);
+            }
+        } else {
+            $query->orderBy('name'); // Default ordering if `order_by` parameter is not provided
+        }
+    
         return $query->paginate();
     }
 }
