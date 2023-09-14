@@ -283,6 +283,21 @@ User::whereYear('created_at', '=', 1998);
 
 ----
 
+## year_exact
+
+This request will order the users first by the `name` column in ascending order and then by the `age` column in descending order
+
+Example:
+
+The url `/api/users?order_by[0][column]=name&order_by[1][column]=age&order_by[1][direction]=desc` 
+sounds like a
+
+```php
+User::orderBy('name')->orderBy('age','desc');
+```
+
+----
+
 ## Filtering relationship fields
 
 You can apply the search filters in the relatioship methods defined in your model.
